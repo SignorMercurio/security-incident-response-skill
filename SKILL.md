@@ -78,7 +78,7 @@ mcp__siren__get_alarm_detail(uid=<UID>, event_id=<Event ID>)
 
 ### 并行执行组
 
-以下命令互相独立，应通过**多个并行的 `mcp__siren__run` 调用同时执行**：
+以下命令互相独立，应通过**多个并行的 `mcp__siren__run` 调用同时执行**（一次性发出所有调用）：
 
 ```bash
 # 组 1: 系统信息
@@ -92,13 +92,26 @@ ps aux --sort=-%cpu | head -n 20
 
 # 组 4: 活跃网络连接
 netstat -antup | grep ESTABLISHED
+
+# 组 5: 监听端口
+ss -tlnp
+
+# 组 6: 登录历史
+last | head -n 30
+
+# 组 7: 定时任务概览
+crontab -l 2>/dev/null; ls -la /etc/cron.d/ 2>/dev/null
+
+# 组 8: 最近 24 小时变动的文件（临时目录）
+find /tmp /var/tmp /dev/shm -type f -mtime -1 -ls 2>/dev/null
 ```
 
 ### 告警/线索相关快速检查
 
-根据告警类型或用户描述的异常，有针对性地执行：
+根据告警类型或用户描述的异常，有针对性地**并行执行**以下检查（互相独立的检查应合并到同一轮调用中）：
+
 ```bash
-# 涉及文件
+# 涉及文件（可与下方进程/网络检查并行）
 ls -la <文件路径> && stat <文件路径>
 
 # 涉及进程
@@ -148,7 +161,24 @@ netstat -antup | grep <IP或端口>
 
 **注意**: 调查指南和实战技巧中的命令仅供参考，实际执行时需根据具体情况调整参数。
 
-### 3.3 分析原则
+### 3.3 并行执行模式
+
+深度分析中的命令分为两类，按以下规则决定并行或串行：
+
+**可并行**：不依赖其他命令输出的独立查询，应合并到同一轮调用。典型场景：
+- 同一进程的不同维度：`cat /proc/<PID>/cmdline` + `ls -la /proc/<PID>/exe` + `lsof -i -P -n | grep <PID>` + `pstree -ap <PID>`（PID 已知时，这 4 个命令可一次性并行发出）
+- 多个日志文件的同一模式搜索：对 access.log、error.log、auth.log 的 grep 可并行
+- 多个持久化位置检查：crontab + systemd + rc.local + bashrc 可并行
+- 文件哈希计算：`md5sum` + `sha256sum` 可并行
+
+**必须串行**：依赖前一步输出才能确定参数的命令。典型场景：
+- 先 `ps aux` 找到可疑 PID → 再查 `/proc/<PID>/...`
+- 先 `grep` 日志定位攻击时间 → 再 `find -newermt` 搜索同时间段文件
+- 先 `readlink /proc/<PID>/exe` 找到文件路径 → 再 `stat` / `md5sum` 该文件
+
+**执行原则**：每轮拿到结果后，立即识别下一步中所有互相独立的命令，合并为一次并行调用。避免逐条串行执行独立命令。
+
+### 3.4 分析原则
 
 - **证据驱动**: 所有结论基于实际证据
 - **灵活调整**: 根据发现的线索动态选择命令
@@ -182,13 +212,29 @@ netstat -antup | grep <IP或端口>
 
 ## 步骤 6：遗留风险排查
 
-系统化检查以下维度：
-- **恶意文件**: Web Shell、临时目录可疑文件、已知样本哈希
-- **持久化**: cron 定时任务、systemd 服务、rc.local/init.d 启动脚本
-- **账户安全**: 新增账户、SSH authorized_keys、sudo 配置
-- **网络连接**: 当前 ESTABLISHED 连接、异常监听端口
-- **系统完整性**: `rpm -Va` / `dpkg -V` 检验系统命令是否被替换
-- **配置文件**: bashrc/bash_profile、/etc/ld.so.preload
+以下 6 个维度互相独立，应通过**并行 `mcp__siren__run` 调用同时执行**：
+
+```bash
+# 组 1: 恶意文件 — Web Shell、临时目录可疑文件
+find /tmp /var/tmp /dev/shm -type f -ls 2>/dev/null
+
+# 组 2: 持久化 — cron + systemd + 启动脚本
+crontab -l 2>/dev/null; for u in $(cut -f1 -d: /etc/passwd); do echo "=== $u ==="; crontab -u $u -l 2>/dev/null; done; cat /etc/crontab 2>/dev/null; ls -la /etc/cron.d/ 2>/dev/null
+
+# 组 3: 持久化 — systemd 服务 + rc.local + init.d
+find /etc/systemd/system /usr/lib/systemd/system -type f -mtime -30 -ls 2>/dev/null; cat /etc/rc.local 2>/dev/null; ls -la /etc/init.d/ 2>/dev/null
+
+# 组 4: 账户安全 — 新增账户 + SSH 密钥 + sudo 配置
+awk -F: '$3 >= 1000 {print $1,$3,$7}' /etc/passwd; find /home /root -name "authorized_keys" -exec ls -la {} \; 2>/dev/null; ls -la /etc/sudoers.d/ 2>/dev/null
+
+# 组 5: 网络连接 — 活跃连接 + 监听端口
+netstat -antup 2>/dev/null; ss -tlnp 2>/dev/null
+
+# 组 6: 系统完整性 + 配置文件
+rpm -Va 2>/dev/null || dpkg -V 2>/dev/null; cat /etc/ld.so.preload 2>/dev/null; grep -l "LD_PRELOAD" /etc/profile /etc/profile.d/* /root/.bashrc /root/.bash_profile 2>/dev/null
+```
+
+根据结果进一步排查（如发现可疑项则深入调查）。
 
 ---
 
