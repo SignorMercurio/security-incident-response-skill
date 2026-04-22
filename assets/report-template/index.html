@@ -1,0 +1,1508 @@
+<!doctype html>
+<html lang="zh-CN">
+    <head>
+        <meta charset="utf-8" />
+        <title>安全事件应急响应报告</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link id="editor-style" rel="stylesheet" href="editor.css" />
+    </head>
+    <body>
+        <div class="shell" id="report-root">
+            <!-- COVER -->
+            <section class="page cover" data-screen-label="01 封面">
+                <div class="cover-top">
+                    <div class="brand-block">
+                        <img
+                            class="brand-logo"
+                            src="assets/logo.png"
+                            alt="阿里云"
+                        />
+                    </div>
+                    <div class="meta">
+                        报告编号 SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span><br />
+                        机密 · 仅供客户使用<br />
+                        分发范围：受限
+                    </div>
+                </div>
+
+                <div class="cover-hero">
+                    <div class="cat">
+                        <span class="sev"
+                            ><span class="dot"></span> 严重等级 · 高危</span
+                        >
+                    </div>
+                    <h1>
+                        安全事件<br />应急响应报告
+                        <span class="en"
+                            >Security Incident Response Report</span
+                        >
+                    </h1>
+                </div>
+
+                <div class="cover-meta">
+                    <div class="cell">
+                        <div class="k">服务编号</div>
+                        <div class="v">
+                            SIR-<span data-var="date">20250507</span><small><span data-var="sir-seq">01</span> · 首次交付</small>
+                        </div>
+                    </div>
+                    <div class="cell">
+                        <div class="k">发布日期</div>
+                        <div class="v">
+                            <span data-var="date" data-format="slash-pad">2025 / 05 / 07</span><small>版本 <span data-var="version">1.0</span></small>
+                        </div>
+                    </div>
+                    <div class="cell">
+                        <div class="k">负责人</div>
+                        <div class="v">
+                            凌 星<small>阿里云 · 应急响应工程师</small>
+                        </div>
+                    </div>
+                    <div class="cell">
+                        <div class="k">服务形式</div>
+                        <div class="v">远程响应<small>非现场交付</small></div>
+                    </div>
+                </div>
+
+                <div class="cover-bottom">
+                    <div class="client">
+                        <small>交付对象 / Prepared for</small>
+                        [ 客户名称 ]
+                    </div>
+                    <div style="text-align: right">
+                        <div class="eyebrow" style="margin-bottom: 6px">
+                            出品 · Issued by
+                        </div>
+                        <div
+                            style="
+                                font-family: &quot;Noto Serif SC&quot;, serif;
+                                font-weight: 600;
+                                font-size: 15px;
+                                color: var(--ink);
+                                line-height: 1.4;
+                            "
+                        >
+                            阿里云智能集团
+                        </div>
+                        <div
+                            style="
+                                font-family:
+                                    &quot;JetBrains Mono&quot;, monospace;
+                                font-size: 10px;
+                                letter-spacing: 0.18em;
+                                color: var(--ink-3);
+                                margin-top: 4px;
+                            "
+                        >
+                            ALIBABA CLOUD<br />INTELLIGENCE GROUP
+                        </div>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">01 / 14</span>
+                </div>
+            </section>
+
+            <!-- LEGAL -->
+            <section class="page" data-screen-label="02 法律声明与前言" data-noedit>
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 法律声明 · 前言</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 00 · 卷前</div>
+                        <h2>
+                            法律声明<span class="en"
+                                >Legal Notice &amp; Foreword</span
+                            >
+                        </h2>
+                    </div>
+                    <div class="rhs">第 02 – 03 页<br />请在使用前阅读</div>
+                </div>
+
+                <div class="lede" style="margin-bottom: 28px">
+                    本文档记录了阿里云受客户委托所执行的安全事件应急响应过程与最终结论，供客户内部使用。
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">00.1</span> 保密与使用
+                    <span class="en">Confidentiality</span>
+                </h3>
+                <div class="legal">
+                    <p>
+                        本文档视为阿里云与客户共同的保密信息。未经双方事先书面同意，您不得向任何第三方披露本手册内容或提供给任何第三方使用，亦不得摘抄、翻译、复制、改写或以任何形式进行传播与宣传。<br /><br />
+                        本文档仅用于客户自身的合法合规业务活动。收件方应按照内部信息分级制度妥善保管本文档的纸质与电子版本。
+                    </p>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">00.2</span> 免责声明
+                    <span class="en">Disclaimer</span>
+                </h3>
+                <div class="legal">
+                    <p>
+                        应急响应严重依赖于日志与遥测数据的完整性。若存在日志未开启、日志丢失、攻击者清理痕迹等情形，本次服务不承诺能
+                        100%
+                        还原攻击路径。在复杂攻击场景下，需要客户侧提供专人配合进行业务特性说明，以便快速理解攻击者的动机与行为特征。<br /><br />
+                        本文档基于报告发布日所能观测到的数据得出结论，以"现状"形式提供。阿里云在现有技术基础上尽最大努力提供相应的介绍及操作指引，但对本文档内容的准确性、完整性、适用性、可靠性不作明示或暗示的保证。
+                    </p>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">00.3</span> 适用范围
+                    <span class="en">Audience</span>
+                </h3>
+                <p>
+                    本文档面向客户安全运营团队、CISO
+                    办公室，以及客户授权的监管、法务人员使用。如需进一步分发，请以书面形式确认。
+                </p>
+
+                <h3 class="sub">
+                    <span class="n">00.4</span> 修订记录
+                    <span class="en">Revision History</span>
+                </h3>
+                <div class="rev" data-edit>
+                    <div class="hd">日期</div>
+                    <div class="hd">版本</div>
+                    <div class="hd">描述</div>
+                    <div class="hd">作者</div>
+                    <div class="cl mono"><span data-var="date" data-format="slash-pad">2025 / 05 / 07</span></div>
+                    <div class="cl mono">1.0</div>
+                    <div class="cl">新建 — 首次响应窗口的分析结论。</div>
+                    <div class="cl">凌星</div>
+                    <div class="cl mono">—</div>
+                    <div class="cl mono">—</div>
+                    <div class="cl" style="color: var(--ink-4)">
+                        待客户评审与确认。
+                    </div>
+                    <div class="cl" style="color: var(--ink-4)">—</div>
+                </div>
+
+                <div class="end-rule">§ 00 · 本节完</div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">02 / 14</span>
+                </div>
+            </section>
+
+            <!-- TOC -->
+            <section class="page" data-screen-label="03 目录" data-noedit>
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 目录</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 索引 · 目录</div>
+                        <h2>目录<span class="en">Table of Contents</span></h2>
+                    </div>
+                    <div class="rhs">共五章</div>
+                </div>
+
+                <div class="toc">
+                    <div class="toc-row">
+                        <div class="n">一</div>
+                        <div class="t">
+                            服务概述<small>服务范围与交付边界</small>
+                        </div>
+                        <div class="pg">04</div>
+                    </div>
+                    <div class="toc-row">
+                        <div class="n">二</div>
+                        <div class="t">
+                            事件概述<small>排查对象、事件发现、事件结论</small>
+                        </div>
+                        <div class="pg">05</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">2.1</div>
+                        <div class="t">排查对象信息</div>
+                        <div class="pg">05</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">2.2</div>
+                        <div class="t">事件发现与时间线</div>
+                        <div class="pg">05</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">2.3</div>
+                        <div class="t">事件结论</div>
+                        <div class="pg">06</div>
+                    </div>
+
+                    <div class="toc-row">
+                        <div class="n">三</div>
+                        <div class="t">
+                            技术分析<small
+                                >攻击手法、样本、入侵路径、ATT&amp;CK
+                                映射</small
+                            >
+                        </div>
+                        <div class="pg">07</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">3.1</div>
+                        <div class="t">攻击手法</div>
+                        <div class="pg">07</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">3.2</div>
+                        <div class="t">样本分析</div>
+                        <div class="pg">08</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">3.3</div>
+                        <div class="t">入侵路径</div>
+                        <div class="pg">08</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">3.4</div>
+                        <div class="t">ATT&amp;CK 攻防矩阵</div>
+                        <div class="pg">09</div>
+                    </div>
+
+                    <div class="toc-row">
+                        <div class="n">四</div>
+                        <div class="t">
+                            响应行动<small>抑制、根除、恢复三阶段处置</small>
+                        </div>
+                        <div class="pg">10</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">4.1</div>
+                        <div class="t">抑制阶段</div>
+                        <div class="pg">10</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">4.2</div>
+                        <div class="t">根除阶段</div>
+                        <div class="pg">10</div>
+                    </div>
+                    <div class="toc-row sub">
+                        <div class="n">4.3</div>
+                        <div class="t">恢复阶段与处置建议</div>
+                        <div class="pg">11</div>
+                    </div>
+
+                    <div class="toc-row">
+                        <div class="n">五</div>
+                        <div class="t">
+                            总结与安全建议<small>事件总结、长期加固建议</small>
+                        </div>
+                        <div class="pg">12</div>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">03 / 14</span>
+                </div>
+            </section>
+
+            <!-- I · Service Overview -->
+            <section class="page" data-screen-label="04 服务概述" data-noedit>
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 一 · 服务概述</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 一 · One</div>
+                        <h2>
+                            服务概述<span class="en">Service Overview</span>
+                        </h2>
+                    </div>
+                    <div class="rhs">服务边界<br />执行规则</div>
+                </div>
+
+                <div class="two">
+                    <div>
+                        <p class="lede" style="margin-bottom: 22px">
+                            阿里云应急响应服务由经验丰富的安全专家为客户提供一对一专业服务，依托规范的服务流程与项目管理机制，协助客户在最短时间内、以最低成本解决紧急安全事件。
+                        </p>
+                        <p>
+                            应急响应服务以远程事件分析为主，具体内容包括：排查主机是否被入侵、处置进行中的攻击、阻断攻击者进一步行动、分析攻击手法，并尽可能定位入侵原因。每一次服务都以"快速止损
+                            + 持久建议"为目标。
+                        </p>
+                        <p>
+                            交付物除本报告外，还包括补充的样本分析文档、IOC（失陷指标）清单，以及相关的遥测数据导出。
+                        </p>
+                    </div>
+                    <div>
+                        <div
+                            style="
+                                border: 1px solid var(--rule);
+                                padding: 22px 24px;
+                                background: rgba(255, 255, 255, 0.35);
+                            "
+                        >
+                            <div class="eyebrow" style="margin-bottom: 14px">
+                                服务边界说明
+                            </div>
+                            <div class="kv" style="padding-top: 0">
+                                <div class="k">日志依赖</div>
+                                <div class="v">
+                                    分析依赖日志。日志未开启、已轮转或被篡改时，溯源能力将受到限制。
+                                </div>
+                            </div>
+                            <div class="kv">
+                                <div class="k">攻击还原</div>
+                                <div class="v">
+                                    在对手清理痕迹的场景下，不承诺 100%
+                                    还原攻击路径。
+                                </div>
+                            </div>
+                            <div class="kv">
+                                <div class="k">业务配合</div>
+                                <div class="v">
+                                    复杂事件需客户指派专人配合，以说明业务特性与关键接口。
+                                </div>
+                            </div>
+                            <div class="kv" style="border-bottom: 0">
+                                <div class="k">服务模式</div>
+                                <div class="v">
+                                    默认远程响应。现场驻场应急须另行签订合同。
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">1.1</span> 服务工作流
+                    <span class="en">Engagement Workflow</span>
+                </h3>
+                <div class="chain">
+                    <div class="step">
+                        <div class="n">01 · 受理</div>
+                        <div class="ico">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            >
+                                <path d="M4 7h16M4 12h16M4 17h10" />
+                            </svg>
+                        </div>
+                        <div class="ttl">接报</div>
+                        <div class="d">范围界定、证物、访问权限、优先级。</div>
+                    </div>
+                    <div class="step">
+                        <div class="n">02 · 抑制</div>
+                        <div class="ico">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            >
+                                <rect
+                                    x="4"
+                                    y="5"
+                                    width="16"
+                                    height="14"
+                                    rx="1"
+                                />
+                                <path d="M4 10h16" />
+                            </svg>
+                        </div>
+                        <div class="ttl">抑制</div>
+                        <div class="d">隔离、阻断 C2、轮转凭证。</div>
+                    </div>
+                    <div class="step acc">
+                        <div class="n">03 · 分析</div>
+                        <div class="ico">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            >
+                                <circle cx="11" cy="11" r="6" />
+                                <path d="M20 20l-4.5-4.5" />
+                            </svg>
+                        </div>
+                        <div class="ttl">分析</div>
+                        <div class="d">取证、样本、ATT&amp;CK 映射。</div>
+                    </div>
+                    <div class="step">
+                        <div class="n">04 · 根除</div>
+                        <div class="ico">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            >
+                                <path d="M4 7h16M10 7V4h4v3M7 7l1 13h8l1-13" />
+                            </svg>
+                        </div>
+                        <div class="ttl">根除</div>
+                        <div class="d">清除立足点、加固主机。</div>
+                    </div>
+                    <div class="step">
+                        <div class="n">05 · 恢复</div>
+                        <div class="ico">
+                            <svg
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.6"
+                            >
+                                <path d="M4 12a8 8 0 1 1 2.5 5.8" />
+                                <path d="M4 18v-5h5" />
+                            </svg>
+                        </div>
+                        <div class="ttl">恢复</div>
+                        <div class="d">恢复业务、出具建议与报告。</div>
+                    </div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">1.2</span> 服务边界
+                    <span class="en">Out of Scope</span>
+                </h3>
+                <p>
+                    本次服务不涵盖第三方软件的源代码级修复、法律取证镜像、托管式
+                    SOC 或长期安全监控等内容。上述项目需单独签订服务合同。
+                </p>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">04 / 14</span>
+                </div>
+            </section>
+
+            <!-- II · Event Overview -->
+            <section class="page" data-screen-label="05 事件概述">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 二 · 事件概述</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 二 · Two</div>
+                        <h2>事件概述<span class="en">Event Overview</span></h2>
+                    </div>
+                    <div class="rhs">资产 · 发现 · 结论</div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">2.1</span> 排查对象信息
+                    <span class="en">Assets in Scope</span>
+                </h3>
+
+                <div class="asset-card">
+                    <div class="idx">01</div>
+                    <div class="body">
+                        <div class="field">
+                            <div class="k">公网 IP</div>
+                            <div class="v">x.x.x.x</div>
+                        </div>
+                        <div class="field">
+                            <div class="k">私网 IP</div>
+                            <div class="v">x.x.x.x</div>
+                        </div>
+                        <div class="field">
+                            <div class="k">实例 ID</div>
+                            <div class="v">[ 实例 ID ]</div>
+                        </div>
+                        <div class="field">
+                            <div class="k">实例名称</div>
+                            <div class="v">[ 实例名称 ]</div>
+                        </div>
+                        <div class="field full">
+                            <div class="k">资产用途</div>
+                            <div class="v zh">
+                                公网 Web 应用主机，通过云负载均衡 TCP/443
+                                对外提供服务。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="asset-card">
+                    <div class="idx">02</div>
+                    <div class="body">
+                        <div class="field">
+                            <div class="k">AccessKey ID</div>
+                            <div class="v">[ AccessKey ID ]</div>
+                        </div>
+                        <div class="field">
+                            <div class="k">RAM 子账户</div>
+                            <div class="v">[ RAM 子账户名称 ]</div>
+                        </div>
+                        <div class="field full">
+                            <div class="k">权限范围</div>
+                            <div class="v zh">
+                                事件发生时对云租户拥有完整的管理权限（Administrator）。
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">2.2</span> 事件发现与时间线
+                    <span class="en">Discovery &amp; Timeline</span>
+                </h3>
+
+                <div class="timeline">
+                    <div class="tl-item">
+                        <div class="t">T − 7 日 · 2025/04/30 ~ 05/06</div>
+                        <div class="h">侦察行为出现</div>
+                        <p>
+                            客户边界出现针对 22、6379、8080
+                            端口的扫描速率上升，但未记录到成功认证。
+                        </p>
+                    </div>
+                    <div class="tl-item acc">
+                        <div class="t">T0 · 2025/05/07 · 09:14 (CST)</div>
+                        <div class="h">疑似首次入侵</div>
+                        <p>
+                            云原生异常告警触发：管理员级 AK
+                            在非常规地理位置发起的 API 调用组合出现异常。
+                        </p>
+                    </div>
+                    <div class="tl-item acc">
+                        <div class="t">T + 1 小时 · 10:22 (CST)</div>
+                        <div class="h">客户宣布启动应急</div>
+                        <p>
+                            客户正式提出应急响应需求，启动合同 SLA
+                            窗口。远程接入建立，开始联合排查。
+                        </p>
+                    </div>
+                    <div class="tl-item">
+                        <div class="t">T + 6 小时 · 15:18 (CST)</div>
+                        <div class="h">抑制动作完成</div>
+                        <p>
+                            受影响实例隔离完成，C2
+                            节点在云防火墙阻断，管理级凭证轮转并吊销会话。
+                        </p>
+                    </div>
+                    <div class="tl-item">
+                        <div class="t">T + 1 日 · 2025/05/08</div>
+                        <div class="h">根除与报告草拟</div>
+                        <p>
+                            通过日志与工件关联，确认根因假设。报告初稿交付客户评审。
+                        </p>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">05 / 14</span>
+                </div>
+            </section>
+
+            <!-- Conclusion -->
+            <section class="page" data-screen-label="06 事件结论">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 2.3 · 事件结论</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 2.3 · 结论</div>
+                        <h2>
+                            事件结论<span class="en">Incident Conclusion</span>
+                        </h2>
+                    </div>
+                    <div class="rhs">置信度 · 高</div>
+                </div>
+
+                <div class="callout">
+                    <div class="corner"></div>
+                    <div class="k">Headline · 核心结论</div>
+                    <h4>
+                        外部攻击者利用一把泄露的管理员级
+                        AccessKey，完成了对云租户的资产枚举，并在一台公网主机上部署了攻击工具，准备进一步横向移动。自告警触发起
+                        6 小时内被完全抑制，在可观测范围内未发现数据外传迹象。
+                    </h4>
+                    <p>
+                        根本原因：某历史源代码仓库中遗留的凭证被公开采集。助推因素：AK
+                        权限过宽、未配置 IP 白名单、缺少针对 AK 的异常检测策略。
+                    </p>
+                </div>
+
+                <div class="verdict">
+                    <div class="kv">
+                        <div class="k">事件定性</div>
+                        <div class="v">
+                            T1078.004 · 凭证泄露导致的未授权访问；攻击者完成租户范围资产枚举，并在一台公网主机部署工具集，尚未形成持久化据点。
+                        </div>
+                    </div>
+                    <div class="kv">
+                        <div class="k">影响范围</div>
+                        <div class="v">
+                            24 台在范围资产中 1 台被部署工具集；在可观测遥测范围内未发现数据外传、破坏或加密。
+                        </div>
+                    </div>
+                    <div class="kv">
+                        <div class="k">处置状态</div>
+                        <div class="v">
+                            已完成 — 泄露 AK 吊销、受影响主机下线重建、同组密钥轮转、出站策略加固。
+                        </div>
+                    </div>
+                    <div class="kv">
+                        <div class="k">残留风险</div>
+                        <div class="v">
+                            建议 7 日内扫描其他历史源码仓库以确认同类凭证未外泄；对 RAM 用户启用异常访问检测（UEBA）；按最小权限原则收敛 RAM 策略。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">06 / 14</span>
+                </div>
+            </section>
+
+            <!-- III · Tech analysis -->
+            <section class="page" data-screen-label="07 攻击手法">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 三 · 技术分析</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 三 · Three</div>
+                        <h2>
+                            技术分析<span class="en">Technical Analysis</span>
+                        </h2>
+                    </div>
+                    <div class="rhs">手法 · 样本 · 路径 · ATT&amp;CK</div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">3.1</span> 攻击手法
+                    <span class="en">Attack Chain</span>
+                </h3>
+
+                <p>
+                    本次入侵遵循典型的云原生攻击链：凭证泄露 → API 枚举 →
+                    横向到单台主机 → 工具落地 →
+                    持久化失败。攻击者首先通过公开渠道获取到历史仓库中遗留的管理员级
+                    AccessKey（合法账户 T1078.004，AK 签发于 2023
+                    年且从未轮转，权限范围过宽），随后使用该凭证从境外 IP 发起
+                    API 侦察（云服务发现 T1580），集中调用 Bucket、实例与 RAM
+                    用户相关的列表类接口，完成租户范围内的资产枚举。<br /><br />
+                    在确认可达目标后，攻击者通过云侧 Run-Command 编排接口（T1651
+                    类）向一台公网主机下发 Shell 指令（Unix Shell
+                    T1059.004），命令由对手的控制通道统一下发；主机拉起工具集后向两个主机托管商
+                    IP 发起 HTTPS 回连（应用层协议
+                    T1071.001），尝试建立反向隧道与网络扫描能力。完成抑制时攻击者尚未开展进一步权限提升，持久化尝试被出站阻断策略失败；在可观测遥测范围内未发现数据销毁、加密或确认的外传行为。
+                </p>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">07 / 14</span>
+                </div>
+            </section>
+
+            <!-- Samples + Path -->
+            <section class="page" data-screen-label="08 样本与路径">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 3.2 · 样本 · 路径</div>
+                </div>
+
+                <h3 class="sub" style="margin-top: 0">
+                    <span class="n">3.2</span> 样本分析
+                    <span class="en">Sample Analysis</span>
+                </h3>
+
+                <p>
+                    样本 A 为网络扫描器（fscan 类 · ELF64），SHA-256 为
+                    a1b2…占位…f9e0，大小 7.3 MB；其核心行为包括 TCP 扫描与
+                    Banner 获取，并针对 SSH / Redis / SMB
+                    等服务发起弱凭证探测，意图在受控主机上横向发现更多可利用目标。<br /><br />
+                    样本 B 为反向隧道客户端（frp-client · ELF64），SHA-256 为
+                    c4d5…占位…8a2b，大小 9.1 MB；其通过 TLS
+                    协议出站回连至主机商中继，将内部端口以反向代理方式暴露，意图建立稳定的
+                    C2 通道以便后续操控。
+                </p>
+
+                <h3 class="sub">
+                    <span class="n">3.3</span> 入侵路径
+                    <span class="en">Intrusion Path</span>
+                </h3>
+
+                <p>
+                    此处粘贴入侵路径示意图，并配以文字说明：从凭证泄露源头开始，逐步描绘攻击者从境外 IP 发起 API 侦察、完成租户范围资产枚举、经由云端 Run-Command 下发 Shell 指令、在目标主机拉起扫描器与反向隧道工具、尝试外连主机商中继的完整路径；重点标注哪几个环节触发了告警、哪几个环节被出站策略阻断。
+                </p>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">08 / 14</span>
+                </div>
+            </section>
+
+            <!-- ATT&CK -->
+            <section class="page" data-screen-label="09 ATT&amp;CK 矩阵">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 3.4 · ATT&amp;CK 矩阵</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 3.4 · 映射</div>
+                        <h2>
+                            ATT&amp;CK 攻防矩阵<span class="en"
+                                >ATT&amp;CK Matrix · Techniques Observed</span
+                            >
+                        </h2>
+                    </div>
+                    <div class="rhs">高亮 = 本次事件涉及</div>
+                </div>
+
+                <div class="attack-grid">
+                    <div class="attack-col">
+                        <div class="h">初始访问</div>
+                        <div class="c used">合法账户</div>
+                        <div class="c">钓鱼</div>
+                        <div class="c">利用公开应用</div>
+                        <div class="c">外部远程服务</div>
+                        <div class="c">可信关系</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">执行攻击</div>
+                        <div class="c used">命令解释器</div>
+                        <div class="c">用户执行</div>
+                        <div class="c">计划任务</div>
+                        <div class="c">系统服务</div>
+                        <div class="c">容器管理</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">持久控制</div>
+                        <div class="c">账户操纵</div>
+                        <div class="c">引导启动项</div>
+                        <div class="c">Web Shell</div>
+                        <div class="c">Cron 任务</div>
+                        <div class="c">SSH 公钥</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">权限提升</div>
+                        <div class="c">提权漏洞</div>
+                        <div class="c">访问令牌操纵</div>
+                        <div class="c">进程注入</div>
+                        <div class="c">有效账户</div>
+                        <div class="c">提权机制滥用</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">防御规避</div>
+                        <div class="c">日志清除</div>
+                        <div class="c">文件混淆</div>
+                        <div class="c">伪装</div>
+                        <div class="c">禁用防护</div>
+                        <div class="c">信任策略篡改</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">凭据访问</div>
+                        <div class="c used">未加密凭证</div>
+                        <div class="c">暴力破解</div>
+                        <div class="c">键盘记录</div>
+                        <div class="c">凭证转储</div>
+                        <div class="c">中间人</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">环境观察</div>
+                        <div class="c used">云服务发现</div>
+                        <div class="c used">云账户</div>
+                        <div class="c">网络扫描</div>
+                        <div class="c">系统信息</div>
+                        <div class="c">进程信息</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">横向移动</div>
+                        <div class="c">远程服务</div>
+                        <div class="c">内部钓鱼</div>
+                        <div class="c">工具传输</div>
+                        <div class="c">备用凭据</div>
+                        <div class="c">会话劫持</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">收集信息</div>
+                        <div class="c">本地数据</div>
+                        <div class="c">云存储数据</div>
+                        <div class="c">剪贴板</div>
+                        <div class="c">屏幕捕获</div>
+                        <div class="c">音视频捕获</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">命令控制</div>
+                        <div class="c used">应用层协议</div>
+                        <div class="c">DNS</div>
+                        <div class="c">Web 服务</div>
+                        <div class="c">加密通道</div>
+                        <div class="c">非标端口</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">窃取数据</div>
+                        <div class="c">经 C2 外传</div>
+                        <div class="c">替代协议外传</div>
+                        <div class="c">Web 服务外传</div>
+                        <div class="c">定时外传</div>
+                        <div class="c">物理介质</div>
+                    </div>
+                    <div class="attack-col">
+                        <div class="h">侵害影响</div>
+                        <div class="c">数据加密</div>
+                        <div class="c">数据破坏</div>
+                        <div class="c">账户剥夺</div>
+                        <div class="c">拒绝服务</div>
+                        <div class="c">资源劫持</div>
+                    </div>
+                </div>
+
+                <div class="two" style="margin-top: 14px">
+                    <div>
+                        <h3 class="sub" style="margin-top: 10px">
+                            <span class="n">3.4.1</span> 覆盖说明
+                            <span class="en">Coverage Notes</span>
+                        </h3>
+                        <p>
+                            本次事件横跨 6 个 ATT&amp;CK 战术。对手尝试通过 Cron
+                            与追加 SSH
+                            公钥方式建立持久化，但在出站通道被阻断后均失败。由于未观察到日志与防御设施被篡改，亦未观察到数据外传，因此"防御绕过"与"数据窃取"战术本报告不予展开。
+                        </p>
+                    </div>
+                    <div>
+                        <h3 class="sub" style="margin-top: 10px">
+                            <span class="n">3.4.2</span> 分析置信度
+                            <span class="en">Analyst Confidence</span>
+                        </h3>
+                        <div class="kv">
+                            <div class="k">初始访问</div>
+                            <div class="v">高 — 多源日志交叉确认</div>
+                        </div>
+                        <div class="kv">
+                            <div class="k">执行 / C2</div>
+                            <div class="v">高 — 命令记录与 PCAP 可溯</div>
+                        </div>
+                        <div class="kv">
+                            <div class="k">数据外传</div>
+                            <div class="v">低 — 未见阳性信号，可观测有限</div>
+                        </div>
+                        <div class="kv" style="border-bottom: 0">
+                            <div class="k">归因</div>
+                            <div class="v">中 — 使用通用工具，判为机会型</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">09 / 14</span>
+                </div>
+            </section>
+
+            <!-- IV · Response -->
+            <section class="page" data-screen-label="10 抑制与根除">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 四 · 响应行动</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 四 · Four</div>
+                        <h2>
+                            响应行动<span class="en">Response Actions</span>
+                        </h2>
+                    </div>
+                    <div class="rhs">抑制 · 根除 · 恢复</div>
+                </div>
+
+                <div class="phase">
+                    <div class="n">4.1</div>
+                    <div class="t">
+                        抑制阶段<span class="en">Containment</span>
+                    </div>
+                    <div class="meta">5 项动作 · 全部完成</div>
+                </div>
+
+                <div class="actions">
+                    <div class="action">
+                        <div class="n">01</div>
+                        <div class="t">清除已发现的恶意进程及文件。</div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">02</div>
+                        <div class="t">
+                            隔离受影响的云服务器（如通过安全组添加全拒绝策略），切断横向与出站通道。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">03</div>
+                        <div class="t">
+                            针对已发现的 C2 IP 地址，使用安全组 /
+                            云防火墙阻断访问。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">04</div>
+                        <div class="t">
+                            紧急轮转已泄露的云凭证（AK /
+                            子账户），并吊销现存会话。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">05</div>
+                        <div class="t">
+                            对受影响主机进行云盘快照备份，保留取证现场。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                </div>
+
+                <div class="phase">
+                    <div class="n">4.2</div>
+                    <div class="t">
+                        根除阶段<span class="en">Eradication</span>
+                    </div>
+                    <div class="meta">3 项动作 · 1 完成 · 2 进行中</div>
+                </div>
+
+                <div class="actions">
+                    <div class="action">
+                        <div class="n">01</div>
+                        <div class="t">
+                            对已发现问题的服务器（或业务、系统）基于干净镜像进行重新部署。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">02</div>
+                        <div class="t">
+                            对于需要保留的服务器，通过云安全中心病毒查杀或终端杀软进行安全扫描，并留存扫描结果。
+                        </div>
+                        <span class="status wip"
+                            ><span class="dot"></span>进行中</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">03</div>
+                        <div class="t">
+                            轮转更改相关密钥，包括但不限于：主机密码、JumpServer
+                            密码、业务后台管理员密码。
+                        </div>
+                        <span class="status wip"
+                            ><span class="dot"></span>进行中</span
+                        >
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">10 / 14</span>
+                </div>
+            </section>
+
+            <!-- Recovery -->
+            <section class="page" data-screen-label="11 恢复与处置建议">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 4.3 · 恢复阶段</div>
+                </div>
+
+                <div class="phase" style="margin-top: 0">
+                    <div class="n">4.3</div>
+                    <div class="t">
+                        恢复阶段 · 处置建议<span class="en"
+                            >Recovery &amp; Hardening</span
+                        >
+                    </div>
+                    <div class="meta">13 项建议 · 1 完成 · 12 待启动</div>
+                </div>
+
+                <p class="lede" style="margin: 16px 0 22px">
+                    恢复阶段的目标是降低同类事件的再发生概率与爆炸半径。建议按风险削减边际与执行难度排序。
+                </p>
+
+                <div class="actions">
+                    <div class="action">
+                        <div class="n">01</div>
+                        <div class="t">
+                            关闭不必要的应用和服务；对无需向公网开放的服务设置访问白名单，仅允许特定
+                            IP 段访问，以收敛攻击面。
+                        </div>
+                        <span class="status done"
+                            ><span class="dot"></span>已完成</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">02</div>
+                        <div class="t">
+                            升级受影响主机 /
+                            容器中的应用框架版本，修复相关漏洞。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">03</div>
+                        <div class="t">
+                            排查所有使用同类组件的系统是否存在类似漏洞，并及时升级受影响组件。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">04</div>
+                        <div class="t">
+                            定期保存主机快照（可采用 ECS
+                            自动快照策略），以便快速应对 Rootkit
+                            感染或勒索病毒事件。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">05</div>
+                        <div class="t">
+                            禁用主账号 AK，采用 RAM 账号和 RAM
+                            角色，遵循最小特权原则进行更严格的权限管理，并防止
+                            AK 泄露。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">06</div>
+                        <div class="t">
+                            对于核心业务 / 高权限 AK，建议通过 RAM
+                            自定义权限策略对 AK 设置访问白名单。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">07</div>
+                        <div class="t">
+                            将重要的业务域名接入 WAF 并开启日志，在防护 Web
+                            攻击的同时便于后续定位入侵原因。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">08</div>
+                        <div class="t">
+                            开启云安全中心日志（至少包含登录流水、暴力破解、进程启动、网络连接），并设置合理的日志留存时间。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">09</div>
+                        <div class="t">
+                            对主机上的 Redis
+                            服务配置白名单，或配置严格的防暴力破解策略。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">10</div>
+                        <div class="t">
+                            增加 Redis 服务的口令强度，同时建议开启 Redis
+                            日志记录功能。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">11</div>
+                        <div class="t">
+                            进行全面风险评估与暴露面梳理，最小化公网攻击面以提升整体安全水位。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">12</div>
+                        <div class="t">
+                            组织渗透测试 / 红蓝对抗，发现外部可能暴露的风险。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                    <div class="action">
+                        <div class="n">13</div>
+                        <div class="t">
+                            建设集中式日志收集系统，避免攻击者对本地日志进行篡改或抹除，并配置相关安全团队定期审计与收敛风险。
+                        </div>
+                        <span class="status todo"
+                            ><span class="dot"></span>未开始</span
+                        >
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">11 / 14</span>
+                </div>
+            </section>
+
+            <!-- V · Summary -->
+            <section class="page" data-screen-label="12 总结">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 五 · 总结</div>
+                </div>
+
+                <div class="sec-head">
+                    <div>
+                        <div class="num">§ 五 · Five</div>
+                        <h2>
+                            总结与安全建议<span class="en"
+                                >Summary &amp; Advisory</span
+                            >
+                        </h2>
+                    </div>
+                    <div class="rhs">经验 · 现状 · 下一步</div>
+                </div>
+
+                <h3 class="sub">
+                    <span class="n">5.1</span> 事件总结
+                    <span class="en">Event Summary</span>
+                </h3>
+
+                <p>
+                    机会型攻击者利用一把泄露的管理员凭证，对租户进行资产枚举、在一台主机落地工具，并在造成实质影响前被抑制。根本原因为管理员
+                    AccessKey 泄露且未配置 IP
+                    白名单；本次事件最大的短板集中在控制面侧的检测深度与 AK
+                    生命周期管理，最大的强项则是告警触发后的宣布与抑制速度足够快。综合评估，当前残余风险为中等，待恢复阶段建议全部闭环后再行复评。<br /><br />
+                    本次事件呈现出典型的现代云入侵特征：被攻破的不再是某台具体主机，而是控制面。一旦管理员级身份落入攻击者之手，其能力范围将覆盖该身份可触达的全部资源，本次即被机会式地选中了一台公网主机作为落脚点。<br /><br />
+                    抑制之所以高效，关键在于告警来自云原生信号（异常地理位置 +
+                    异常 API
+                    组合），而非主机侧指标；若依赖主机侧告警，将过晚触发。这是本次事件最值得固化的经验。<br /><br />
+                    下一步加固工作围绕三个主题展开：身份（退役管理员
+                    AK、采用角色、保留的 AK 必须 IP
+                    白名单化）、可观测性（集中化日志、控制面侧检测）、暴露面（减少对外暴露、建立服务基线）。
+                </p>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">12 / 14</span>
+                </div>
+            </section>
+
+            <!-- Advisory -->
+            <section class="page" data-screen-label="13 参考资料">
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 5.2 · 参考资料</div>
+                </div>
+
+                <h3 class="sub" style="margin-top: 0">
+                    <span class="n">5.2</span> 参考资料
+                    <span class="en">Further Reading</span>
+                </h3>
+                <div class="kv">
+                    <div class="k">框架</div>
+                    <div class="v">
+                        MITRE ATT&amp;CK for Enterprise — 战术与技术详情。<br /><a
+                            class="ref mono"
+                            href="https://attack.mitre.org/matrices/enterprise/"
+                            target="_blank"
+                            rel="noopener"
+                            >https://attack.mitre.org/matrices/enterprise/</a
+                        >
+                    </div>
+                </div>
+                <div class="kv">
+                    <div class="k">基线</div>
+                    <div class="v">
+                        云安全环境最佳实践。<br /><a
+                            class="ref mono"
+                            href="https://help.aliyun.com/document_detail/101898.html"
+                            target="_blank"
+                            rel="noopener"
+                            >https://help.aliyun.com/document_detail/101898.html</a
+                        >
+                    </div>
+                </div>
+                <div class="kv" style="border-bottom: 0">
+                    <div class="k">服务</div>
+                    <div class="v">
+                        阿里云 · 安全管家服务。<br /><a
+                            class="ref mono"
+                            href="https://www.aliyun.com/product/sos"
+                            target="_blank"
+                            rel="noopener"
+                            >https://www.aliyun.com/product/sos</a
+                        >
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">13 / 14</span>
+                </div>
+            </section>
+
+            <!-- Colophon -->
+            <section
+                class="page"
+                data-screen-label="14 版本与致谢"
+                data-noedit
+                style="display: flex; flex-direction: column"
+            >
+                <div class="runhead">
+                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div>§ 报告尾页</div>
+                </div>
+
+                <div
+                    style="
+                        flex: 1;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        text-align: left;
+                    "
+                >
+                    <div class="eyebrow" style="margin-bottom: 18px">
+                        报告终 · End of Report
+                    </div>
+                    <div
+                        style="
+                            font-family: &quot;Noto Serif SC&quot;, serif;
+                            font-weight: 500;
+                            font-size: 68px;
+                            line-height: 1.1;
+                            letter-spacing: 0;
+                        "
+                    >
+                        感谢您的<br />仔细<em
+                            style="color: var(--accent); font-style: normal"
+                            >阅读</em
+                        >。
+                        <div
+                            style="
+                                font-family:
+                                    &quot;Instrument Serif&quot;, serif;
+                                font-style: italic;
+                                font-weight: 400;
+                                font-size: 24px;
+                                color: var(--ink-3);
+                                margin-top: 20px;
+                            "
+                        >
+                            Thank you for reading with care.
+                        </div>
+                    </div>
+
+                    <div
+                        style="
+                            margin-top: 60px;
+                            display: grid;
+                            grid-template-columns: repeat(2, 1fr);
+                            gap: 0;
+                            border-top: 1px solid var(--rule);
+                            padding-top: 22px;
+                        "
+                    >
+                        <div
+                            style="
+                                padding-right: 20px;
+                                border-right: 1px solid var(--rule-soft);
+                            "
+                        >
+                            <div class="eyebrow" style="margin-bottom: 8px">
+                                报告编号
+                            </div>
+                            <div
+                                style="
+                                    font-family:
+                                        &quot;JetBrains Mono&quot;, monospace;
+                                    font-size: 13px;
+                                    color: var(--ink);
+                                    line-height: 1.7;
+                                "
+                            >
+                                SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span><br />版本 <span data-var="version">1.0</span> · <span data-var="date" data-format="slash">2025/05/07</span>
+                            </div>
+                        </div>
+                        <div style="padding-left: 20px">
+                            <div class="eyebrow" style="margin-bottom: 8px">
+                                密级
+                            </div>
+                            <div
+                                style="
+                                    font-family:
+                                        &quot;JetBrains Mono&quot;, monospace;
+                                    font-size: 13px;
+                                    color: var(--accent);
+                                    line-height: 1.7;
+                                "
+                            >
+                                机密<br />仅供客户使用
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="runfoot">
+                    <span>阿里云 · 云安全服务团队</span>
+                    <span class="pg">14 / 14</span>
+                </div>
+            </section>
+        </div>
+
+        <div class="edit-bar" contenteditable="false">
+            <span class="status" id="edStatus">浏览模式</span>
+            <button
+                type="button"
+                id="edToggle"
+                class="primary"
+                title="进入编辑模式"
+            >
+                ✎ 编辑
+            </button>
+            <button
+                type="button"
+                id="edUndo"
+                class="only-editing"
+                title="撤销（⌘Z / Ctrl+Z）"
+                disabled
+            >
+                ↶ 撤销
+            </button>
+            <button
+                type="button"
+                id="edRedo"
+                class="only-editing"
+                title="重做（⌘⇧Z / Ctrl+Y）"
+                disabled
+            >
+                ↷ 重做
+            </button>
+            <button
+                type="button"
+                id="edPdf"
+                class="only-browsing"
+                title="打印为 PDF（在系统打印对话框中选择“保存为 PDF”）"
+            >
+                ⤓ 导出 PDF
+            </button>
+            <button
+                type="button"
+                id="edDiscard"
+                class="only-draft"
+                title="丢弃本地草稿"
+            >
+                ⟲ 放弃草稿
+            </button>
+            <button
+                type="button"
+                id="edHelp"
+                title="快捷指引"
+                aria-label="帮助"
+            >
+                ?
+            </button>
+        </div>
+
+        <div id="help-overlay" hidden>
+            <div class="help-card" role="dialog" aria-label="快捷指引">
+                <button
+                    type="button"
+                    class="help-close"
+                    aria-label="关闭"
+                >✕</button>
+                <h2>快捷指引 <small>Cheatsheet</small></h2>
+
+                <h3>进入编辑</h3>
+                <ul>
+                    <li>右下角 <kbd>✎ 编辑</kbd> 进入；<kbd>✓ 完成</kbd> 退出。编辑模式下文本被点到会高亮。</li>
+                </ul>
+
+                <h3>文字排版（系统快捷键）</h3>
+                <ul>
+                    <li>加粗 <kbd>⌘B</kbd> · 斜体 <kbd>⌘I</kbd> · 下划线 <kbd>⌘U</kbd>（Windows 用 <kbd>Ctrl</kbd>）</li>
+                    <li>段内换行 <kbd>Enter</kbd>（仅段落/列表；其他格子 Enter 已屏蔽以防破坏格式）</li>
+                    <li>撤销 <kbd>⌘Z</kbd> · 重做 <kbd>⌘⇧Z</kbd>，也可用工具栏按钮</li>
+                </ul>
+
+                <h3>一处修改多处同步</h3>
+                <ul>
+                    <li>带<b class="help-dotted">橙色点状下划线</b>的字段是同步锚点：改任一处，其他自动更新。</li>
+                    <li>同步范围：日期（封面 / 报告编号 / 所有页眉 / 尾页）、服务编号末段（01 / 02…）、版本号（封面 + 尾页，修订表不参与）</li>
+                </ul>
+
+                <h3>插入图片</h3>
+                <ul>
+                    <li>编辑模式下 <kbd>⌘V</kbd> 粘贴剪贴板图片 · 或从 Finder 拖图到目标段落附近</li>
+                    <li>宽度超过 1600px 的图会自动压到 JPEG；单报告约可容纳 50 张</li>
+                    <li>删除图片：鼠标点到图片右侧按 <kbd>Backspace</kbd>（和删字一样）</li>
+                </ul>
+
+                <h3>小节与列表</h3>
+                <ul>
+                    <li>每页底部 <kbd>+ 小节</kbd> → 追加二级小节（3.1 / 3.2…），自动编号</li>
+                    <li>小节标题悬停出现 <kbd>+ 子</kbd> → 追加三级子小节（3.1.1 …）；<kbd>✕</kbd> 删除整节（含子节内容）</li>
+                    <li>排查对象、时间线、行动项、参考建议、TOC 等列表都有 <kbd>+</kbd> / <kbd>✕</kbd></li>
+                </ul>
+
+                <h3>草稿自动保存</h3>
+                <ul>
+                    <li>编辑内容自动写入浏览器 IndexedDB；刷新后顶部横幅可选择 <kbd>加载草稿</kbd> 或 <kbd>放弃草稿</kbd></li>
+                    <li>工具栏 <kbd>⟲ 放弃草稿</kbd> 可手动清空当前草稿</li>
+                </ul>
+
+                <h3>不可编辑页</h3>
+                <ul>
+                    <li>03 目录：自动生成 · 04 服务概述：模板固定 · 14 版本与致谢：模板固定</li>
+                </ul>
+
+                <h3>导出</h3>
+                <ul>
+                    <li><kbd>⌘P</kbd> 或 <kbd>⤓ 导出 PDF</kbd> → 默认文件名 <code>{客户}-安全事件应急响应报告-{日期}-{编号}.pdf</code></li>
+                </ul>
+            </div>
+        </div>
+
+        <script id="editor-script" src="editor.js" defer></script>
+    </body>
+</html>

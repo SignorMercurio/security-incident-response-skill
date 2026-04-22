@@ -15,7 +15,7 @@ description: 安全应急响应专家：分析安全告警，通过 SIREN 在受
 4. 漏洞定位和分析
 5. 攻击链重建（基于 MITRE ATT&CK）
 6. 遗留风险排查
-7. 一次性生成命令日志 + 应急响应报告
+7. 生成 HTML 应急响应报告
 
 所有分析基于远程命令执行，严格遵守只读原则，确保证据完整性。
 
@@ -238,14 +238,14 @@ rpm -Va 2>/dev/null || dpkg -V 2>/dev/null; cat /etc/ld.so.preload 2>/dev/null; 
 
 ---
 
-## 步骤 7：生成双文件输出
+## 步骤 7：生成 HTML 应急响应报告
 
-### 7.1 文件命名规范
+报告模板是一个自包含的 HTML 静态站点，位于 Skill 目录下的 `assets/report-template/`（内含 `index.html` + `editor.css` + `editor.js` + `assets/`）。每份报告是一个目录拷贝 + 原地修改 `index.html`。
 
-采用统一前缀 + 日期 + 主机名 + 事件类型的命名格式，确保在大量报告中一眼可辨识：
+### 7.1 输出目录命名规范
 
 ```
-IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]-{report|commands}.md
+IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 ```
 
 **字段说明**:
@@ -254,7 +254,6 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]-{report|commands}.md
 - `{hostname}`：受影响主机名（不含域名后缀，特殊字符转 `-`）
 - `{event_type}`：事件类型 slug（见下表），未知时填 `unknown`
 - `{event_id}`：仅模式一包含，用于区分同主机多起事件
-- 后缀 `-report.md`：应急响应报告；`-commands.md`：命令执行日志
 
 **事件类型 slug 对照表**:
 
@@ -274,16 +273,48 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]-{report|commands}.md
 | 其他/未分类 | `unknown` |
 
 **示例**:
-- 模式一：`IR-20260417-web01-webshell-123456-report.md` / `IR-20260417-web01-webshell-123456-commands.md`
-- 模式二：`IR-20260417-db-prod-rce-report.md` / `IR-20260417-db-prod-rce-commands.md`
+- 模式一：`IR-20260417-web01-webshell-123456/`
+- 模式二：`IR-20260417-db-prod-rce/`
 
-### 7.2 命令执行日志
+### 7.2 生成步骤
 
-从对话历史中回溯所有已执行的命令，**一次性生成**命令日志文件。使用 `assets/commands_log_template.md` 作为模板。
+1. **确定输出路径**：调用 Skill 时的当前工作目录下，新建 `IR-…/` 目录
+2. **拷贝模板**：将 `<skill_root>/assets/report-template/` 的全部内容拷到上一步的目录。相对路径的 `editor.css` / `editor.js` / `assets/logo.png` / 字体都必须跟着走，不要只拷 `index.html`
+3. **原地编辑 `index.html`**：用 Edit 工具替换模板中的示例内容为本次事件的实际数据（见 §7.3 数据槽位清单）
+4. **不要运行 dev server**：输出是静态文件。用户用浏览器直接打开 `index.html` 查看，或在浏览器里点右上角 `⤓ 导出 PDF` 获得可分发的 PDF
 
-### 7.3 应急响应报告
+### 7.3 数据槽位清单
 
-使用 `assets/report_template.md` 作为模板生成报告。**仅保留与本次事件相关的章节，省略不适用的章节**。
+模板的占位内容都已填好了示例（一个 AK 泄露事件），生成时按章节逐个替换。关键槽位：
+
+**封面（§ 一 · 服务概述前的 `.cover-*` 区块）**
+- `.client`：客户名称（形如"某某科技有限公司"）
+- `[data-var="date"]`：报告日期，`YYYYMMDD` 格式（与目录名中的 `{YYYYMMDD}` 一致）
+- `[data-var="sir-seq"]`：当日序号，默认 `01`，同一客户当日多份报告递增
+- 封面左侧大字 `.cover-hero` 下的 `.sev`（级别：高危/中危/低危）、`.cat`（事件类型标签）、`.sub`（事件简述）
+- 封面下方 `.cover-meta` 字段：事件编号、处置状态、完成日期等
+
+**§ 一 · 服务概述**：背景、范围、方法——通常轻度定制即可
+
+**§ 二 · 事件回顾**：核心章节
+- `.timeline`：攻击时间线，按 `<div class="tl-item">` 逐条填
+- `.chain`：攻击链可视化步骤，每个 `<div class="step">` 是一环
+- `.verdict` 下的 `.kv`：事件定性、影响范围、处置状态、残留风险四项
+
+**§ 三 · 技术分析**：漏洞/载荷/IoC 等
+- `.attack-grid`：MITRE ATT&CK 战术×技术映射
+- 关键证据代码块、载荷分析等
+
+**§ 四 · 处置与加固**
+- `.actions`：处置措施，每条一个 `<div class="action">`
+- `.asset-card`：受影响资产卡片
+- 长短期加固建议
+
+**§ 五 · 附录与声明**
+- IoC 清单、引用资料
+- 末页法律声明（通常不变）
+
+**原则**：读取模板里每个区块的示例结构，**保留 HTML 骨架**（class/data-* 属性不动），只替换文字与数值。不确定结构时用 Read + Edit，禁止整块 innerHTML 重写。
 
 ### 7.4 报告要求
 
@@ -291,6 +322,7 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]-{report|commands}.md
 - **证据**: 每个结论需要证据支撑
 - **IoC**: 完整提取所有网络/文件/进程/账户 IoC
 - **可操作性**: 提供具体的修复建议和操作步骤
+- **命令证据**：把在 SIREN 执行过的关键命令与关键输出片段粘进对应章节的证据代码块，不再单独输出 commands 日志
 
 ---
 
@@ -301,8 +333,7 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]-{report|commands}.md
 | 调查指南 | `references/invest_*.md` (12个) | 步骤3：按告警类型按需加载 |
 | 实战技巧 | `references/tech_*.md` (6个) | 步骤3：按场景按需加载 |
 | ATT&CK 框架 | `references/attack_framework.md` | 步骤5：攻击链映射时加载 |
-| 报告模板 | `assets/report_template.md` | 步骤7：生成报告 |
-| 日志模板 | `assets/commands_log_template.md` | 步骤7：生成命令日志 |
+| HTML 报告模板 | `assets/report-template/` | 步骤7：整目录拷贝到 cwd 后原地编辑 `index.html` |
 
 ---
 
