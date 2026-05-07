@@ -4,7 +4,22 @@
         <meta charset="utf-8" />
         <title>安全事件应急响应报告</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link id="editor-style" rel="stylesheet" href="editor.css" />
+        <link rel="icon" href="assets/logo.png" />
+        <link
+            rel="preload"
+            href="assets/fonts/noto-sans-sc-400-latin.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link
+            rel="preload"
+            href="assets/fonts/noto-serif-sc-500-latin.woff2"
+            as="font"
+            type="font/woff2"
+            crossorigin
+        />
+        <link id="editor-style" rel="stylesheet" href="editor.css?v=2" />
     </head>
     <body>
         <div class="shell" id="report-root">
@@ -19,7 +34,10 @@
                         />
                     </div>
                     <div class="meta">
-                        报告编号 SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span><br />
+                        报告编号 SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        ><br />
                         机密 · 仅供客户使用<br />
                         分发范围：受限
                     </div>
@@ -43,13 +61,21 @@
                     <div class="cell">
                         <div class="k">服务编号</div>
                         <div class="v">
-                            SIR-<span data-var="date">20250507</span><small><span data-var="sir-seq">01</span> · 首次交付</small>
+                            SIR-<span data-var="date">20250507</span
+                            ><small
+                                ><span data-var="sir-seq">01</span> ·
+                                首次交付</small
+                            >
                         </div>
                     </div>
                     <div class="cell">
                         <div class="k">发布日期</div>
                         <div class="v">
-                            <span data-var="date" data-format="slash-pad">2025 / 05 / 07</span><small>版本 <span data-var="version">1.0</span></small>
+                            <span data-var="date" data-format="slash-pad"
+                                >2025 / 05 / 07</span
+                            ><small
+                                >版本 <span data-var="version">1.0</span></small
+                            >
                         </div>
                     </div>
                     <div class="cell">
@@ -106,9 +132,18 @@
             </section>
 
             <!-- LEGAL -->
-            <section class="page" data-screen-label="02 法律声明与前言" data-noedit>
+            <section
+                class="page"
+                data-screen-label="02 法律声明与前言"
+                data-noedit
+            >
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 法律声明 · 前言</div>
                 </div>
 
@@ -170,7 +205,11 @@
                     <div class="hd">版本</div>
                     <div class="hd">描述</div>
                     <div class="hd">作者</div>
-                    <div class="cl mono"><span data-var="date" data-format="slash-pad">2025 / 05 / 07</span></div>
+                    <div class="cl mono">
+                        <span data-var="date" data-format="slash-pad"
+                            >2025 / 05 / 07</span
+                        >
+                    </div>
                     <div class="cl mono">1.0</div>
                     <div class="cl">新建 — 首次响应窗口的分析结论。</div>
                     <div class="cl">凌星</div>
@@ -193,7 +232,12 @@
             <!-- TOC -->
             <section class="page" data-screen-label="03 目录" data-noedit>
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 目录</div>
                 </div>
 
@@ -308,7 +352,12 @@
             <!-- I · Service Overview -->
             <section class="page" data-screen-label="04 服务概述" data-noedit>
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 一 · 服务概述</div>
                 </div>
 
@@ -484,7 +533,12 @@
             <!-- II · Event Overview -->
             <section class="page" data-screen-label="05 事件概述">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 二 · 事件概述</div>
                 </div>
 
@@ -606,7 +660,12 @@
             <!-- Conclusion -->
             <section class="page" data-screen-label="06 事件结论">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 2.3 · 事件结论</div>
                 </div>
 
@@ -638,25 +697,31 @@
                     <div class="kv">
                         <div class="k">事件定性</div>
                         <div class="v">
-                            T1078.004 · 凭证泄露导致的未授权访问；攻击者完成租户范围资产枚举，并在一台公网主机部署工具集，尚未形成持久化据点。
+                            T1078.004 ·
+                            凭证泄露导致的未授权访问；攻击者完成租户范围资产枚举，并在一台公网主机部署工具集，尚未形成持久化据点。
                         </div>
                     </div>
                     <div class="kv">
                         <div class="k">影响范围</div>
                         <div class="v">
-                            24 台在范围资产中 1 台被部署工具集；在可观测遥测范围内未发现数据外传、破坏或加密。
+                            24 台在范围资产中 1
+                            台被部署工具集；在可观测遥测范围内未发现数据外传、破坏或加密。
                         </div>
                     </div>
                     <div class="kv">
                         <div class="k">处置状态</div>
                         <div class="v">
-                            已完成 — 泄露 AK 吊销、受影响主机下线重建、同组密钥轮转、出站策略加固。
+                            已完成 — 泄露 AK
+                            吊销、受影响主机下线重建、同组密钥轮转、出站策略加固。
                         </div>
                     </div>
                     <div class="kv">
                         <div class="k">残留风险</div>
                         <div class="v">
-                            建议 7 日内扫描其他历史源码仓库以确认同类凭证未外泄；对 RAM 用户启用异常访问检测（UEBA）；按最小权限原则收敛 RAM 策略。
+                            建议 7
+                            日内扫描其他历史源码仓库以确认同类凭证未外泄；对 RAM
+                            用户启用异常访问检测（UEBA）；按最小权限原则收敛 RAM
+                            策略。
                         </div>
                     </div>
                 </div>
@@ -670,7 +735,12 @@
             <!-- III · Tech analysis -->
             <section class="page" data-screen-label="07 攻击手法">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 三 · 技术分析</div>
                 </div>
 
@@ -713,7 +783,12 @@
             <!-- Samples + Path -->
             <section class="page" data-screen-label="08 样本与路径">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 3.2 · 样本 · 路径</div>
                 </div>
 
@@ -739,7 +814,10 @@
                 </h3>
 
                 <p>
-                    此处粘贴入侵路径示意图，并配以文字说明：从凭证泄露源头开始，逐步描绘攻击者从境外 IP 发起 API 侦察、完成租户范围资产枚举、经由云端 Run-Command 下发 Shell 指令、在目标主机拉起扫描器与反向隧道工具、尝试外连主机商中继的完整路径；重点标注哪几个环节触发了告警、哪几个环节被出站策略阻断。
+                    此处粘贴入侵路径示意图，并配以文字说明：从凭证泄露源头开始，逐步描绘攻击者从境外
+                    IP 发起 API 侦察、完成租户范围资产枚举、经由云端 Run-Command
+                    下发 Shell
+                    指令、在目标主机拉起扫描器与反向隧道工具、尝试外连主机商中继的完整路径；重点标注哪几个环节触发了告警、哪几个环节被出站策略阻断。
                 </p>
 
                 <div class="runfoot">
@@ -751,7 +829,12 @@
             <!-- ATT&CK -->
             <section class="page" data-screen-label="09 ATT&amp;CK 矩阵">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 3.4 · ATT&amp;CK 矩阵</div>
                 </div>
 
@@ -911,7 +994,12 @@
             <!-- IV · Response -->
             <section class="page" data-screen-label="10 抑制与根除">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 四 · 响应行动</div>
                 </div>
 
@@ -1029,7 +1117,12 @@
             <!-- Recovery -->
             <section class="page" data-screen-label="11 恢复与处置建议">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 4.3 · 恢复阶段</div>
                 </div>
 
@@ -1186,7 +1279,12 @@
             <!-- V · Summary -->
             <section class="page" data-screen-label="12 总结">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 五 · 总结</div>
                 </div>
 
@@ -1230,7 +1328,12 @@
             <!-- Advisory -->
             <section class="page" data-screen-label="13 参考资料">
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 5.2 · 参考资料</div>
                 </div>
 
@@ -1289,7 +1392,12 @@
                 style="display: flex; flex-direction: column"
             >
                 <div class="runhead">
-                    <div class="brand">SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span></div>
+                    <div class="brand">
+                        SIR-<span data-var="date">20250507</span>-<span
+                            data-var="sir-seq"
+                            >01</span
+                        >
+                    </div>
                     <div>§ 报告尾页</div>
                 </div>
 
@@ -1315,7 +1423,7 @@
                         "
                     >
                         感谢您的<br />仔细<em
-                            style="color: var(--accent); font-style: normal"
+                            style="color: var(--accent-ink); font-style: normal"
                             >阅读</em
                         >。
                         <div
@@ -1361,7 +1469,14 @@
                                     line-height: 1.7;
                                 "
                             >
-                                SIR-<span data-var="date">20250507</span>-<span data-var="sir-seq">01</span><br />版本 <span data-var="version">1.0</span> · <span data-var="date" data-format="slash">2025/05/07</span>
+                                SIR-<span data-var="date">20250507</span>-<span
+                                    data-var="sir-seq"
+                                    >01</span
+                                ><br />版本
+                                <span data-var="version">1.0</span> ·
+                                <span data-var="date" data-format="slash"
+                                    >2025/05/07</span
+                                >
                             </div>
                         </div>
                         <div style="padding-left: 20px">
@@ -1373,7 +1488,7 @@
                                     font-family:
                                         &quot;JetBrains Mono&quot;, monospace;
                                     font-size: 13px;
-                                    color: var(--accent);
+                                    color: var(--accent-ink);
                                     line-height: 1.7;
                                 "
                             >
@@ -1418,14 +1533,35 @@
             >
                 ↷ 重做
             </button>
-            <button
-                type="button"
-                id="edPdf"
-                class="only-browsing"
-                title="打印为 PDF（在系统打印对话框中选择“保存为 PDF”）"
-            >
-                ⤓ 导出 PDF
-            </button>
+            <div class="export-menu only-browsing">
+                <button
+                    type="button"
+                    id="edExport"
+                    class="export-trigger"
+                    aria-haspopup="menu"
+                    title="导出 PDF 或 HTML"
+                >
+                    ⤓ 导出 ▾
+                </button>
+                <div class="export-items" role="menu">
+                    <button
+                        type="button"
+                        id="edPdf"
+                        role="menuitem"
+                        title="打印为 PDF（在系统打印对话框中选择“保存为 PDF”）"
+                    >
+                        PDF
+                    </button>
+                    <button
+                        type="button"
+                        id="edHtml"
+                        role="menuitem"
+                        title="下载可编辑的单文件 HTML 留档"
+                    >
+                        HTML
+                    </button>
+                </div>
+            </div>
             <button
                 type="button"
                 id="edDiscard"
@@ -1439,66 +1575,133 @@
                 id="edHelp"
                 title="快捷指引"
                 aria-label="帮助"
+                aria-controls="help-overlay"
+                aria-expanded="false"
             >
                 ?
             </button>
         </div>
 
         <div id="help-overlay" hidden>
-            <div class="help-card" role="dialog" aria-label="快捷指引">
-                <button
-                    type="button"
-                    class="help-close"
-                    aria-label="关闭"
-                >✕</button>
-                <h2>快捷指引 <small>Cheatsheet</small></h2>
+            <div
+                class="help-card"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="help-title"
+            >
+                <button type="button" class="help-close" aria-label="关闭">
+                    ✕
+                </button>
+                <h2 id="help-title">快捷指引 <small>Cheatsheet</small></h2>
 
                 <h3>进入编辑</h3>
                 <ul>
-                    <li>右下角 <kbd>✎ 编辑</kbd> 进入；<kbd>✓ 完成</kbd> 退出。编辑模式下文本被点到会高亮。</li>
+                    <li>
+                        右下角 <kbd>✎ 编辑</kbd> 进入；<kbd>✓ 完成</kbd>
+                        退出。编辑模式下文本被点到会高亮。
+                    </li>
                 </ul>
 
                 <h3>文字排版（系统快捷键）</h3>
                 <ul>
-                    <li>加粗 <kbd>⌘B</kbd> · 斜体 <kbd>⌘I</kbd> · 下划线 <kbd>⌘U</kbd>（Windows 用 <kbd>Ctrl</kbd>）</li>
-                    <li>段内换行 <kbd>Enter</kbd>（仅段落/列表；其他格子 Enter 已屏蔽以防破坏格式）</li>
-                    <li>撤销 <kbd>⌘Z</kbd> · 重做 <kbd>⌘⇧Z</kbd>，也可用工具栏按钮</li>
+                    <li>
+                        加粗 <kbd>⌘B</kbd> · 斜体 <kbd>⌘I</kbd> · 下划线
+                        <kbd>⌘U</kbd>（Windows 用 <kbd>Ctrl</kbd>）
+                    </li>
+                    <li>
+                        段内换行 <kbd>Enter</kbd>（仅段落/列表；其他格子 Enter
+                        已屏蔽以防破坏格式）
+                    </li>
+                    <li>
+                        撤销 <kbd>⌘Z</kbd> · 重做
+                        <kbd>⌘⇧Z</kbd>，也可用工具栏按钮
+                    </li>
                 </ul>
 
                 <h3>一处修改多处同步</h3>
                 <ul>
-                    <li>带<b class="help-dotted">橙色点状下划线</b>的字段是同步锚点：改任一处，其他自动更新。</li>
-                    <li>同步范围：日期（封面 / 报告编号 / 所有页眉 / 尾页）、服务编号末段（01 / 02…）、版本号（封面 + 尾页，修订表不参与）</li>
+                    <li>
+                        带<b class="help-dotted">橙色点状下划线</b
+                        >的字段是同步锚点：改任一处，其他自动更新。
+                    </li>
+                    <li>
+                        同步范围：日期（封面 / 报告编号 / 所有页眉 /
+                        尾页）、服务编号末段（01 / 02…）、版本号（封面 +
+                        尾页，修订表不参与）
+                    </li>
                 </ul>
 
                 <h3>插入图片</h3>
                 <ul>
-                    <li>编辑模式下 <kbd>⌘V</kbd> 粘贴剪贴板图片 · 或从 Finder 拖图到目标段落附近</li>
-                    <li>宽度超过 1600px 的图会自动压到 JPEG；单报告约可容纳 50 张</li>
-                    <li>删除图片：鼠标点到图片右侧按 <kbd>Backspace</kbd>（和删字一样）</li>
+                    <li>
+                        编辑模式下 <kbd>⌘V</kbd> 粘贴剪贴板图片 · 或从 Finder
+                        拖图到目标段落附近
+                    </li>
+                    <li>
+                        宽度超过 1600px 的图会自动压到 JPEG；单报告约可容纳 50
+                        张
+                    </li>
+                    <li>
+                        鼠标移到图片，右上角浮出工具条：<kbd>⅓</kbd> /
+                        <kbd>⅔</kbd> / <kbd>▭</kbd> 切换宽度，<kbd>✕</kbd>
+                        删除（也可在下一段按 <kbd>Backspace</kbd>）
+                    </li>
+                </ul>
+
+                <h3>无序列表（项目符号）</h3>
+                <ul>
+                    <li>
+                        段首输入 <kbd>-</kbd> / <kbd>*</kbd> / <kbd>+</kbd> 加空格
+                        → 自动转成 <kbd>•</kbd>（同 Markdown）
+                    </li>
+                    <li>
+                        在 <kbd>•</kbd> 行末按 <kbd>Enter</kbd>
+                        → 下一行继续新项；空 <kbd>•</kbd> 行再按
+                        <kbd>Enter</kbd> → 退出列表，留在当前行写普通文字
+                    </li>
                 </ul>
 
                 <h3>小节与列表</h3>
                 <ul>
-                    <li>每页底部 <kbd>+ 小节</kbd> → 追加二级小节（3.1 / 3.2…），自动编号</li>
-                    <li>小节标题悬停出现 <kbd>+ 子</kbd> → 追加三级子小节（3.1.1 …）；<kbd>✕</kbd> 删除整节（含子节内容）</li>
-                    <li>排查对象、时间线、行动项、参考建议、TOC 等列表都有 <kbd>+</kbd> / <kbd>✕</kbd></li>
+                    <li>
+                        每页底部 <kbd>+ 小节</kbd> → 追加二级小节（3.1 /
+                        3.2…），自动编号
+                    </li>
+                    <li>
+                        小节标题悬停出现 <kbd>+ 子</kbd> → 追加三级子小节（3.1.1
+                        …）；<kbd>✕</kbd> 删除整节（含子节内容）
+                    </li>
+                    <li>
+                        排查对象、时间线、行动项、参考建议、TOC 等列表都有
+                        <kbd>+</kbd> / <kbd>✕</kbd>
+                    </li>
                 </ul>
 
                 <h3>草稿自动保存</h3>
                 <ul>
-                    <li>编辑内容自动写入浏览器 IndexedDB；刷新后顶部横幅可选择 <kbd>加载草稿</kbd> 或 <kbd>放弃草稿</kbd></li>
+                    <li>
+                        编辑内容自动写入浏览器 IndexedDB；刷新后顶部横幅可选择
+                        <kbd>加载草稿</kbd> 或 <kbd>放弃草稿</kbd>
+                    </li>
                     <li>工具栏 <kbd>⟲ 放弃草稿</kbd> 可手动清空当前草稿</li>
                 </ul>
 
                 <h3>不可编辑页</h3>
                 <ul>
-                    <li>03 目录：自动生成 · 04 服务概述：模板固定 · 14 版本与致谢：模板固定</li>
+                    <li>
+                        03 目录：自动生成 · 04 服务概述：模板固定 · 14
+                        版本与致谢：模板固定
+                    </li>
                 </ul>
 
                 <h3>导出</h3>
                 <ul>
-                    <li><kbd>⌘P</kbd> 或 <kbd>⤓ 导出 PDF</kbd> → 默认文件名 <code>{客户}-安全事件应急响应报告-{日期}-{编号}.pdf</code></li>
+                    <li>
+                        <kbd>⌘P</kbd> 或 <kbd>⤓ 导出 PDF</kbd> → 默认文件名
+                        <code
+                            >{客户}-安全事件应急响应报告-{日期}-{编号}.pdf</code
+                        >
+                    </li>
                 </ul>
             </div>
         </div>
