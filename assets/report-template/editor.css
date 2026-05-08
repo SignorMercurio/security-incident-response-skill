@@ -30327,6 +30327,10 @@ h3.sub::after {
   color: rgba(244, 241, 234, 0.55);
   margin-bottom: 10px;
 }
+.callout .k,
+.callout .k * {
+  color: rgba(244, 241, 234, 0.55) !important;
+}
 .callout h4 {
   font-family: "Noto Serif SC", serif;
   font-weight: 500;
@@ -30340,6 +30344,14 @@ h3.sub::after {
   font-size: 14px;
   margin: 0;
   line-height: 1.75;
+}
+.callout h4,
+.callout h4 * {
+  color: var(--paper) !important;
+}
+.callout p,
+.callout p * {
+  color: rgba(244, 241, 234, 0.78) !important;
 }
 .callout .corner {
   position: absolute;
