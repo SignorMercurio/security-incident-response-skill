@@ -132,6 +132,7 @@ netstat -antup | grep <IP或端口>
 | 告警类型 | 参考文件 |
 |---------|---------|
 | Web Shell 后门 | `references/invest_webshell.md` |
+| ASP.NET/IIS 上传目录 WebShell 溯源 | `references/aspnet_webshell_upload_tracing.md` |
 | 挖矿木马 | `references/invest_mining.md` |
 | 反弹 Shell | `references/invest_reverse_shell.md` |
 | 暴力破解 | `references/invest_brute_force.md` |
@@ -141,10 +142,18 @@ netstat -antup | grep <IP或端口>
 | 勒索软件 | `references/invest_ransomware.md` |
 | SQL 注入 | `references/invest_sql_injection.md` |
 | 远程代码执行 (RCE) | `references/invest_rce.md` |
+| DNSLog / OOB 域名请求 | `references/oob_dnslog_investigation.md` |
 | 持久化后门 | `references/invest_persistence.md` |
 | 通用技巧 | `references/invest_common.md` |
 
 **模式二补充**: 根据用户描述的异常现象推断最可能的攻击类型，从相应调查思路入手。
+
+#### WebShell 告警判读补充
+
+- 不要把可疑文件的 `atime` 自动判定为攻击者访问时间；云安全中心/SAS 扫描读取也会刷新访问时间。必须用 Web 访问日志、SAS 进程/网络遥测或 WAF 日志交叉验证。
+- 若 nginx/Apache 日志中告警文件 0 命中，而文件 `atime` 与告警时间接近，应明确写成“告警扫描触发/文件存在告警”，不要写成“攻击者在该时间调用 WebShell”。
+- WebShell 文件当前存在不等于当前可利用：检查 nginx/PHP 配置（例如 `location ~ \.php$ { return 403; }`、仅放行 `/index.php`）并实际核对访问日志状态码。
+- 发现一个 WebShell 时，扩展排查同目录同时间段批量落地文件、压缩包和数据库探测脚本（常见：`shell*.php`、`s.php`、`mysql.php`、`db_*.php`、`dump*.php`、`rd*.php`、`rde*.php`、`arc.tar.gz`），并检查硬编码数据库凭据与数据导出风险。
 
 ### 3.2 按需加载实战技巧
 
@@ -155,13 +164,24 @@ netstat -antup | grep <IP或端口>
 | 找不到 Web 日志、需要日志分析 | `references/tech_log_analysis.md` |
 | 正向证据不足、需要反向推理 | `references/tech_reverse_reasoning.md` |
 | 涉及云助手/AK/Actiontrail | `references/tech_cloud.md` |
+| 需要查云端日志（WAF / 云安全中心 / ActionTrail）—— 什么攻击类型查哪个 | `references/cloud_log_queries.md`（实际查询走 `sls` skill） |
+| SAS 主机遥测的覆盖时间窗算法、`w3wp.exe` 子进程解读、报告措辞（本环境特有的坑） | `references/sas_sls_host_telemetry.md` |
 | 需要进程关联或文件时间分析 | `references/tech_process_file.md` |
 | 发现进程隐藏/命令替换/Python注入 | `references/tech_attack_countermeasures.md` |
 | 需要威胁情报查询 | `references/tech_threat_intel.md` |
 
 **注意**: 调查指南和实战技巧中的命令仅供参考，实际执行时需根据具体情况调整参数。
 
-### 3.3 并行执行模式
+### 3.3 云端日志查询（WAF / 云安全中心）—— 调用 `sls` skill
+
+主机侧日志经常被清除、轮转丢失或定位不到。需要交叉验证攻击者真实 IP、攻击时间窗、命中的 WAF 规则、进程启动链、登录来源时，**通过 `Skill` 工具调用 `sls` skill** 查询阿里云云端日志（WAF / 云安全中心 SAS / ActionTrail）。
+
+- **路由对照**（什么攻击类型查哪个 `-product` 和 logstore）：**Read `references/cloud_log_queries.md`**。简单记忆：Web 类攻击（WebShell / SQL 注入 / RCE / 文件上传）→ 查 WAF 日志；恶意进程 / 反弹 Shell / 数据外传 → 查 SAS `aegis-log-process` / `aegis-log-network` / `aegis-log-dns-query`；异常登录 / 暴力破解 → 查 SAS `aegis-log-login` + `sas-security-log`；AK 泄露 / 云助手滥用 → 查 ActionTrail。
+- **前提**：`sls` 查询要 UID。告警驱动模式已有；自由调查模式若用户没给则先索取，拿不到就跳过云端查询并在报告中说明。
+- 云端日志是**补充证据源**，主线仍是 SIREN 远程命令；只在主机侧证据缺失/不足或需交叉验证时才调用。
+- 不要在本 skill 里重抄 `sls` 的查询语法/字段坑 —— 这些 `sls` skill 自带参考文件，需要时让它自己加载。
+
+### 3.4 并行执行模式
 
 深度分析中的命令分为两类，按以下规则决定并行或串行：
 
@@ -178,7 +198,7 @@ netstat -antup | grep <IP或端口>
 
 **执行原则**：每轮拿到结果后，立即识别下一步中所有互相独立的命令，合并为一次并行调用。避免逐条串行执行独立命令。
 
-### 3.4 分析原则
+### 3.5 分析原则
 
 - **证据驱动**: 所有结论基于实际证据
 - **灵活调整**: 根据发现的线索动态选择命令
@@ -319,7 +339,7 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 ### 7.4 报告要求
 
 - **语言**: 简体中文
-- **证据**: 每个结论需要证据支撑
+- **证据**: 每个结论需要证据支撑；对云安全中心/SLS 类证据必须写明日志源、时间窗口、最早/最新记录与覆盖限制。主机侧报告至少覆盖网络外联、进程启动、远程/数据库登录、SAS 告警四类；即使进程侧没有命令执行证据，也要写明进程日志最早覆盖时间，避免把“未检出”误写成“未发生”
 - **IoC**: 完整提取所有网络/文件/进程/账户 IoC；报告可见文本里的 IPv4 地址统一做展示层转义，只把最后一个点替换成 `[.]`，例如 `1.1.1.1` 写成 `1.1.1[.]1`。执行命令、检索过滤和内部分析仍使用原始 IP，不要把转义形式拿去跑命令
 - **可操作性**: 提供具体的修复建议和操作步骤
 - **命令证据**：把在 SIREN 执行过的关键命令与关键输出片段粘进对应章节的证据代码块，不再单独输出 commands 日志
@@ -333,6 +353,10 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 |------|------|---------|
 | 调查指南 | `references/invest_*.md` (12个) | 步骤3：按告警类型按需加载 |
 | 实战技巧 | `references/tech_*.md` (6个) | 步骤3：按场景按需加载 |
+| 云端日志路由 | `references/cloud_log_queries.md` | 步骤3：需要查 WAF / 云安全中心 / ActionTrail 日志时加载，决定什么攻击类型查哪个 logstore |
+| SLS 查询执行 | `sls` skill（通过 `Skill` 工具调用，或 Read `~/.agents/skills/sls/SKILL.md`） | 步骤3：实际执行云端 SLS 查询；自带 query 语法、WAF 字段坑、SAS topic、Log Audit 中心项目等参考文件 |
+| SAS 主机遥测（环境特有坑） | `references/sas_sls_host_telemetry.md` | 用 SAS SLS 补主机网络外联/进程启动/登录/告警覆盖时间线时加载：时间戳 CAST、`proc_start_time` 过滤、`w3wp.exe` 子进程解读、覆盖时间窗的报告写法 |
+| DNSLog / OOB 域名请求 | `references/oob_dnslog_investigation.md` | 调查 dnslog.cn、interact.sh、oast、burpcollaborator 等带外回连域名告警时加载 |
 | ATT&CK 框架 | `references/attack_framework.md` | 步骤5：攻击链映射时加载 |
 | HTML 报告模板 | `assets/report-template/` | 步骤7：整目录拷贝到 cwd 后原地编辑 `index.html` |
 

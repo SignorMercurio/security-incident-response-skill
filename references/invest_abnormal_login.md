@@ -66,6 +66,14 @@ awk -F: '$3 >= 1000 {print $1,$3}' /etc/passwd
 grep "password changed" /var/log/auth.log
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+主机 `auth.log`/`secure` 可能被清除或不含 RDP/数据库登录。**通过 `Skill` 工具调用 `sls` skill** `-product sas`：
+- topic `aegis-log-login`（原始登录遥测，含 SSH / RDP / 数据库登录）按 `instance_id`/`src_ip`/`host_ip` 过滤，查登录来源、时间、方式。
+- topic `sas-security-log` 查云安全中心异常登录告警（如 `异常登录-ECS非常用时间登录`，详情含 RDP 源 IP、用户、协议、客户端 IP）；区分原始登录遥测和告警遥测。
+
+需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - 登录用户名
 - 登录来源 IP 和地理位置

@@ -64,6 +64,10 @@ lsof -u www-data
 pstree -ap | grep -A 10 "nginx\|apache\|httpd"
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+WAF 日志里才是攻击者真实 IP（不是 SLB/Nginx 后的内网 IP），且主机 `access.log` 常被清除/轮转丢失。**通过 `Skill` 工具调用 `sls` skill**：`-product waf` 按 `host` + `request_path`/`request_uri`（WebShell 路径、上传接口）+ `real_client_ip` + `final_action`/`final_rule_id` + `time` 过滤，定位上传请求、利用请求和真实攻击 IP（解读时注意 `waf_test`/`final_action`「测试模式 ≠ 实际拦截」）；再用 `-product sas` topic `aegis-log-process`（按 web 用户/`instance_id` 过滤）还原 WebShell 拉起的子进程链。需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - Web Shell 文件路径和哈希
 - 攻击者 IP 地址

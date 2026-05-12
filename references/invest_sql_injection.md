@@ -52,6 +52,10 @@ find /var/www -type f -newermt "<攻击时间>" -ls
 grep -r "SELECT.*\$_GET\|SELECT.*\$_POST" /var/www --include="*.php"
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+主机 `access.log` 常被清除/轮转，WAF 日志里才是攻击者真实 IP。**通过 `Skill` 工具调用 `sls` skill**：`-product waf` 按 `host` + `request_path`/`request_uri` + `real_client_ip` + `final_rule_id`/`final_action` + `time` 过滤，定位注入请求、注入点 URL 和真实攻击 IP（注意 `waf_test`/`final_action`「测试模式 ≠ 实际拦截」）。若数据库审计日志投递到了 SLS，可用 direct 模式直连对应 logstore 查异常查询。需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - 攻击源 IP
 - 注入点 URL

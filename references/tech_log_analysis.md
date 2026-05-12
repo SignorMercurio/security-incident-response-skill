@@ -146,6 +146,8 @@ cat urls_*.txt | sort | uniq -c | awk '$1 == 6 {print $2}'
 
 ## WAF 日志高级分析技巧
 
+> 查 WAF 原始日志**通过 `sls` skill**（`-product waf`，metadata 模式）—— 调用方式和「什么攻击类型该查 WAF」见 `references/cloud_log_queries.md`。`sls` skill 还自带 `references/waf-ddos-and-test-mode-interpretation.md`（核心规则测试模式 vs 实际拦截、高防/DDoS 措辞坑）和 `references/waf-cc-internal-rule-recompute.md`（内置 CC 规则命中重算）。本节是拿到 WAF 日志之后的字段分析与会话关联技巧。
+
 ### 快捷视图分析分布特征
 SLS 查询界面左侧的快捷视图可以快速查看字段分布：
 - `request_path` - 查看访问最多的路径

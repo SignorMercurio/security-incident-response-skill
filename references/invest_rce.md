@@ -49,6 +49,14 @@ find /tmp /var/tmp -type f -newermt "<攻击时间>" -ls
 lsof -i -P -n | grep www-data
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+**通过 `Skill` 工具调用 `sls` skill**：
+- `-product waf` 按 `host` + `request_path`/`request_uri` + `real_client_ip` + `time` 过滤，定位利用请求和真实攻击 IP（注意 `waf_test`/`final_action`「测试模式 ≠ 实际拦截」）。
+- `-product sas` topic `aegis-log-process` 按 `instance_id` + `parent_proc_name`/`pcmdline`（含 web 进程名如 `java`/`php-fpm`/`nginx`/`w3wp.exe`）过滤，还原命令执行链和父进程；`aegis-log-network` 查 RCE 后续的外联/下载。
+
+需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - 攻击源 IP
 - 漏洞利用 URL 和 payload

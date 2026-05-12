@@ -53,6 +53,14 @@ fail2ban-client status sshd
 iptables -L -n -v | grep "<攻击IP>"
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+主机 `lastb`/`auth.log` 可能被清除或不含 RDP/数据库登录。**通过 `Skill` 工具调用 `sls` skill** `-product sas`：
+- topic `aegis-log-login` 按 `instance_id`/`src_ip`/`host_ip` 过滤，统计失败/成功登录，找暴破源 IP 和「失败→成功」的转折点（确认是否破解成功）。
+- topic `sas-security-log` 查云安全中心暴力破解/异常登录告警。
+
+需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - 攻击源 IP 地址
 - 攻击时间段

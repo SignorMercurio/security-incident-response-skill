@@ -60,6 +60,15 @@ grep -r "/dev/tcp" /tmp /var/tmp /dev/shm 2>/dev/null
 grep -r "nc.*-e" / 2>/dev/null | head -n 20
 ```
 
+## 云端日志补充（通过 `sls` skill）
+
+**通过 `Skill` 工具调用 `sls` skill** `-product sas`：
+- topic `aegis-log-network` 按 `instance_id` + `dst_ip`/`dst_port` + `proc_name`（`bash`/`sh`/`nc`/`socat`/`python`/`perl` 等）过滤，定位反弹连接和发起进程。
+- topic `aegis-log-process` 按 `instance_id` + `parent_proc_name`/`pcmdline` 过滤，还原 shell 进程的父进程（确认是 Web RCE 触发还是登录后手动执行）。
+- 域名回连/带 DGA 的配 topic `aegis-log-dns-query`。
+
+需要 UID（自由调查模式没有则向用户索取）。详见 `references/cloud_log_queries.md`。
+
 ## 关键 IoC
 - 反弹 Shell 目标 IP 和端口
 - 反弹 Shell 命令或脚本路径
