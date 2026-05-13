@@ -15,7 +15,7 @@ description: 安全应急响应专家：分析安全告警，通过 SIREN 在受
 4. 漏洞定位和分析
 5. 攻击链重建（基于 MITRE ATT&CK）
 6. 遗留风险排查
-7. 生成 HTML 应急响应报告
+7. 生成 Markdown 应急响应报告
 
 所有分析基于远程命令执行，严格遵守只读原则，确保证据完整性。
 
@@ -258,9 +258,9 @@ rpm -Va 2>/dev/null || dpkg -V 2>/dev/null; cat /etc/ld.so.preload 2>/dev/null; 
 
 ---
 
-## 步骤 7：生成 HTML 应急响应报告
+## 步骤 7：生成 Markdown 应急响应报告
 
-报告模板是一个自包含的 HTML 静态站点，位于 Skill 目录下的 `assets/report-template/`（内含 `index.html` + `editor.css` + `editor.js` + `assets/`）。每份报告是一个目录拷贝 + 原地修改 `index.html`。
+报告模板位于 `<skill_root>/assets/report.md`，来源于 `dossier/report.md`。每份报告只需要在输出目录中生成一份填好的 `report.md`。
 
 ### 7.1 输出目录命名规范
 
@@ -299,42 +299,22 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 ### 7.2 生成步骤
 
 1. **确定输出路径**：调用 Skill 时的当前工作目录下，新建 `IR-…/` 目录
-2. **拷贝模板**：将 `<skill_root>/assets/report-template/` 的全部内容拷到上一步的目录。相对路径的 `editor.css` / `editor.js` / `assets/logo.png` / 字体都必须跟着走，不要只拷 `index.html`
-3. **原地编辑 `index.html`**：用 Edit 工具替换模板中的示例内容为本次事件的实际数据（见 §7.3 数据槽位清单）
-4. **不要运行 dev server**：输出是静态文件。用户用浏览器直接打开 `index.html` 查看，或在浏览器里点右上角 `⤓ 导出 PDF` 获得可分发的 PDF
+2. **拷贝模板**：将 `<skill_root>/assets/report.md` 复制为 `IR-…/report.md`
+3. **填充报告副本**：只编辑 `IR-…/report.md`，把模板占位说明替换为本次事件的实际数据
+4. **只交付 Markdown**：不要创建 `index.html`、CSS/JS、字体资源或 dev server；本 skill 的交付物是 `report.md`
 
-### 7.3 数据槽位清单
+### 7.3 模板结构
 
-模板的占位内容都已填好了示例（一个 AK 泄露事件），生成时按章节逐个替换。关键槽位：
+生成时先 Read `assets/report.md`，再编辑输出目录中的 `report.md`。保留 Markdown 标题、frontmatter 和 `:::` 指令块，只替换占位内容。
 
-**封面（§ 一 · 服务概述前的 `.cover-*` 区块）**
-- `.client`：客户名称（形如"某某科技有限公司"）
-- `[data-var="date"]`：报告日期，`YYYYMMDD` 格式（与目录名中的 `{YYYYMMDD}` 一致）
-- `[data-var="sir-seq"]`：当日序号，默认 `01`，同一客户当日多份报告递增
-- 封面左侧大字 `.cover-hero` 下的 `.sev`（级别：高危/中危/低危）、`.cat`（事件类型标签）、`.sub`（事件简述）
-- 封面下方 `.cover-meta` 字段：事件编号、处置状态、完成日期等
+关键结构：
+- **Frontmatter**：填写 `date`、`sir-seq`、`version`、`client`
+- **封面块**：填写 `::: cover-hero` 与 `::: cover-meta`
+- **事件概述**：填写 `::: asset`、`::: timeline`、`::: callout`，以及事件定性、影响范围、处置状态、残留风险
+- **技术分析**：填写排查过程、样本分析、入侵路径和 `::: attack`；仅给有证据支撑的 ATT&CK 技术加 `!`
+- **响应行动与总结**：用 `[x]` / `[/]` / `[ ]` 区分已完成、进行中、未开始，并保留与本次事件直接相关的参考资料
 
-**§ 一 · 服务概述**：背景、范围、方法——通常轻度定制即可
-
-**§ 二 · 事件回顾**：核心章节
-- `.timeline`：攻击时间线，按 `<div class="tl-item">` 逐条填
-- `.chain`：攻击链可视化步骤，每个 `<div class="step">` 是一环
-- `.verdict` 下的 `.kv`：事件定性、影响范围、处置状态、残留风险四项
-
-**§ 三 · 技术分析**：漏洞/载荷/IoC 等
-- `.attack-grid`：MITRE ATT&CK 战术×技术映射
-- 关键证据代码块、载荷分析等
-
-**§ 四 · 处置与加固**
-- `.actions`：处置措施，每条一个 `<div class="action">`
-- `.asset-card`：受影响资产卡片
-- 长短期加固建议
-
-**§ 五 · 附录与声明**
-- IoC 清单、引用资料
-- 末页法律声明（通常不变）
-
-**原则**：读取模板里每个区块的示例结构，**保留 HTML 骨架**（class/data-* 属性不动），只替换文字与数值。不确定结构时用 Read + Edit，禁止整块 innerHTML 重写。
+不要把模板改写成 HTML，不要添加 `<span style=...>`、`<font>`、内联 `color` 或其他视觉样式。
 
 ### 7.4 报告要求
 
@@ -343,7 +323,7 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 - **IoC**: 完整提取所有网络/文件/进程/账户 IoC；报告可见文本里的 IPv4 地址统一做展示层转义，只把最后一个点替换成 `[.]`，例如 `1.1.1.1` 写成 `1.1.1[.]1`。执行命令、检索过滤和内部分析仍使用原始 IP，不要把转义形式拿去跑命令
 - **可操作性**: 提供具体的修复建议和操作步骤
 - **命令证据**：把在 SIREN 执行过的关键命令与关键输出片段粘进对应章节的证据代码块，不再单独输出 commands 日志
-- **样式**：保留模板的配色和字体层级，不要给正文、标题或“Headline · 核心结论”区域额外添加 inline `color`、`font`、`background` 等视觉样式。核心结论是黑底区域，文字必须使用模板默认浅色，禁止改成黑色或其他奇怪颜色
+- **样式**：保留 Markdown 模板的标题、frontmatter 和 `:::` 指令块，不要添加 HTML/CSS 内联样式、字体颜色或背景色；核心结论只填写内容，不改视觉样式
 
 ---
 
@@ -358,7 +338,7 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]
 | SAS 主机遥测（环境特有坑） | `references/sas_sls_host_telemetry.md` | 用 SAS SLS 补主机网络外联/进程启动/登录/告警覆盖时间线时加载：时间戳 CAST、`proc_start_time` 过滤、`w3wp.exe` 子进程解读、覆盖时间窗的报告写法 |
 | DNSLog / OOB 域名请求 | `references/oob_dnslog_investigation.md` | 调查 dnslog.cn、interact.sh、oast、burpcollaborator 等带外回连域名告警时加载 |
 | ATT&CK 框架 | `references/attack_framework.md` | 步骤5：攻击链映射时加载 |
-| HTML 报告模板 | `assets/report-template/` | 步骤7：整目录拷贝到 cwd 后原地编辑 `index.html` |
+| Markdown 报告模板 | `assets/report.md` | 步骤7：复制到 `IR-…/report.md` 后原地编辑 |
 
 ---
 

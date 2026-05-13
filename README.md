@@ -10,7 +10,7 @@ Reports and supporting materials are generated in Simplified Chinese by design (
 - **12 attack-type playbooks** + **6 tradecraft guides** + **MITRE ATT&CK mapping**
 - **Parallel command orchestration** — independent remote commands are dispatched in a single round to cut investigation time
 - **Strictly read-only** — only `cat / grep / find / ls / ps / netstat / lsof` and similar read-only commands are allowed; evidence integrity is preserved
-- **Self-contained HTML report** — each incident produces a directory `IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}]/` containing a standalone HTML report (plus its CSS/JS/fonts); open `index.html` in a browser to view, or use the built-in "⤓ 导出 PDF" button to generate a shareable PDF
+- **Markdown incident report** — each incident writes a filled `report.md` from the bundled Dossier-style template
 
 ## Prerequisites
 
@@ -72,10 +72,7 @@ When there is no alarm ID, provide the Client ID plus a short description of the
 .
 ├── SKILL.md                        # Skill definition and workflow
 ├── assets/
-│   └── report-template/            # Self-contained HTML report template
-│       ├── index.html              # The report page (fill its data slots)
-│       ├── editor.css / editor.js  # In-browser editing + PDF export runtime
-│       └── assets/                 # Logo + Noto Serif/Sans SC + JetBrains Mono fonts
+│   └── report.md                   # Markdown report template copied from dossier/report.md
 └── references/
     ├── invest_*.md                 # 12 attack-type playbooks (loaded on demand)
     ├── tech_*.md                   # 6 tradecraft guides (loaded on demand)
@@ -91,10 +88,10 @@ The skill writes a directory into the cwd:
 - `IR-20260417-web01-webshell-123456/` — alarm-driven, Event ID `123456`
 - `IR-20260417-db-prod-rce/` — free-form mode
 
-Each directory is a self-contained copy of `assets/report-template/` with `index.html` edited to reflect the specific incident. Double-click `index.html` to view in a browser, or click **⤓ 导出 PDF** in the top-right toolbar to export a shareable PDF named `{客户}-安全事件应急响应报告-{YYYYMMDD}-{seq}.pdf`.
+Each directory contains a filled `report.md` copied from `assets/report.md`.
 
 The full event-type slug table (`webshell` / `miner` / `revshell` / `brute` / `abnlogin` / `privesc` / `exfil` / `ransom` / `sqli` / `rce` / `backdoor` / `unknown`) is documented in `SKILL.md` §7.1.
 
 ## Contributing
 
-Playbooks and tradecraft guides live in `references/`, the HTML report template in `assets/report-template/`. Playbooks and guides are plain Markdown — PRs adding new attack types or refining command snippets are welcome. Template changes should be made in the upstream `ir-report` source project and then synced into this skill.
+Playbooks and tradecraft guides live in `references/`, and the report template lives in `assets/report.md`. Playbooks, guides, and the report template are plain Markdown — PRs adding new attack types or refining command snippets are welcome. Template changes should be made in the upstream `dossier` project and then synced into this skill.
