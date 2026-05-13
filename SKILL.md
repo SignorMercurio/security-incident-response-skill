@@ -1,6 +1,10 @@
 ---
 name: security-incident-response
-description: 安全应急响应专家：分析安全告警，通过 SIREN 在受害主机执行远程溯源调查，构建攻击链并生成中文应急响应报告。支持告警驱动和自由调查两种模式。
+description: 安全应急响应专家：通过 SIREN 在受害主机执行只读远程溯源调查，构建 ATT&CK 攻击链并生成中文应急响应报告。
+  支持告警驱动模式（用户提供 UID + Event ID）和自由调查模式（无告警，按用户描述的异常线索排查）。
+  触发短语：'应急响应'、'查一下这个告警'、'这个事件排查一下'、'看看 event ID xxx'、'查这台主机'、
+  '事件溯源'、'排查 webshell'、'查挖矿'、'排查反弹 shell'、'查暴破'、'IR on host'、
+  'investigate this alert'、'incident response'、'trace this intrusion'。
 ---
 
 # 安全应急响应专家
@@ -18,6 +22,31 @@ description: 安全应急响应专家：分析安全告警，通过 SIREN 在受
 7. 生成 Markdown 应急响应报告
 
 所有分析基于远程命令执行，严格遵守只读原则，确保证据完整性。
+
+---
+
+## 执行约定（贯穿全流程）
+
+### 安全护栏（最高优先级）
+
+- **只读**：仅允许 `cat`/`grep`/`find`/`ls`/`ps`/`netstat`/`ss`/`lsof`/`stat`/`md5sum`/`sha256sum` 等只读命令
+- **严禁破坏性操作**：`rm`、`mv`、`kill`、`dd`、`>` 覆盖重定向、`tee` 写入、修改文件权限/属主
+- **限制输出**：大文件先 `wc -l` 评估，再用 `head -n N` / `tail -n N` / `grep` 过滤
+- **场景化参数**：命令中的时间范围、IP、关键字、路径必须结合实际告警/线索填充，不要硬抄占位符
+
+### 并行调用
+
+互相独立的命令一次性发出多个 `mcp__siren__run` 并行调用；每轮拿到结果立即识别下一步中所有独立命令再合并。
+
+### SIREN 异常处理
+
+- SIREN 超时/失败：简化命令重试一次，仍失败则跳过并在报告中标注
+- 客户端断线：告知用户，等待重连或切换备用客户端
+- 日志被清除：标注后转向其他证据源（进程、网络、文件时间戳）
+
+### 证据原则
+
+证据驱动；推测必须明确标注「推测」。
 
 ---
 
@@ -74,52 +103,9 @@ mcp__siren__get_alarm_detail(uid=<UID>, event_id=<Event ID>)
 
 ## 步骤 2：初步信息收集
 
-使用 `mcp__siren__run(client_id=<ID>, command=<命令>)` 执行命令。
+并行执行 8 项独立主机检查：系统信息 / 时间主机名 / 高 CPU 进程 / ESTABLISHED 连接 / 监听端口 / 登录历史 / 定时任务概览 / `/tmp /var/tmp /dev/shm` 近 24h 变动文件。
 
-### 并行执行组
-
-以下命令互相独立，应通过**多个并行的 `mcp__siren__run` 调用同时执行**（一次性发出所有调用）：
-
-```bash
-# 组 1: 系统信息
-uname -a && cat /etc/os-release
-
-# 组 2: 时间和主机名
-date && hostname
-
-# 组 3: 高 CPU 进程
-ps aux --sort=-%cpu | head -n 20
-
-# 组 4: 活跃网络连接
-netstat -antup | grep ESTABLISHED
-
-# 组 5: 监听端口
-ss -tlnp
-
-# 组 6: 登录历史
-last | head -n 30
-
-# 组 7: 定时任务概览
-crontab -l 2>/dev/null; ls -la /etc/cron.d/ 2>/dev/null
-
-# 组 8: 最近 24 小时变动的文件（临时目录）
-find /tmp /var/tmp /dev/shm -type f -mtime -1 -ls 2>/dev/null
-```
-
-### 告警/线索相关快速检查
-
-根据告警类型或用户描述的异常，有针对性地**并行执行**以下检查（互相独立的检查应合并到同一轮调用中）：
-
-```bash
-# 涉及文件（可与下方进程/网络检查并行）
-ls -la <文件路径> && stat <文件路径>
-
-# 涉及进程
-ps aux | grep <进程名>
-
-# 涉及网络
-netstat -antup | grep <IP或端口>
-```
+并补充告警或用户线索相关的针对性检查（文件 / 进程 / 网络）。
 
 ---
 
@@ -148,13 +134,6 @@ netstat -antup | grep <IP或端口>
 
 **模式二补充**: 根据用户描述的异常现象推断最可能的攻击类型，从相应调查思路入手。
 
-#### WebShell 告警判读补充
-
-- 不要把可疑文件的 `atime` 自动判定为攻击者访问时间；云安全中心/SAS 扫描读取也会刷新访问时间。必须用 Web 访问日志、SAS 进程/网络遥测或 WAF 日志交叉验证。
-- 若 nginx/Apache 日志中告警文件 0 命中，而文件 `atime` 与告警时间接近，应明确写成“告警扫描触发/文件存在告警”，不要写成“攻击者在该时间调用 WebShell”。
-- WebShell 文件当前存在不等于当前可利用：检查 nginx/PHP 配置（例如 `location ~ \.php$ { return 403; }`、仅放行 `/index.php`）并实际核对访问日志状态码。
-- 发现一个 WebShell 时，扩展排查同目录同时间段批量落地文件、压缩包和数据库探测脚本（常见：`shell*.php`、`s.php`、`mysql.php`、`db_*.php`、`dump*.php`、`rd*.php`、`rde*.php`、`arc.tar.gz`），并检查硬编码数据库凭据与数据导出风险。
-
 ### 3.2 按需加载实战技巧
 
 根据调查中遇到的场景，**选择性 Read 实战技巧文件**：
@@ -181,80 +160,29 @@ netstat -antup | grep <IP或端口>
 - 云端日志是**补充证据源**，主线仍是 SIREN 远程命令；只在主机侧证据缺失/不足或需交叉验证时才调用。
 - 不要在本 skill 里重抄 `sls` 的查询语法/字段坑 —— 这些 `sls` skill 自带参考文件，需要时让它自己加载。
 
-### 3.4 并行执行模式
-
-深度分析中的命令分为两类，按以下规则决定并行或串行：
-
-**可并行**：不依赖其他命令输出的独立查询，应合并到同一轮调用。典型场景：
-- 同一进程的不同维度：`cat /proc/<PID>/cmdline` + `ls -la /proc/<PID>/exe` + `lsof -i -P -n | grep <PID>` + `pstree -ap <PID>`（PID 已知时，这 4 个命令可一次性并行发出）
-- 多个日志文件的同一模式搜索：对 access.log、error.log、auth.log 的 grep 可并行
-- 多个持久化位置检查：crontab + systemd + rc.local + bashrc 可并行
-- 文件哈希计算：`md5sum` + `sha256sum` 可并行
-
-**必须串行**：依赖前一步输出才能确定参数的命令。典型场景：
-- 先 `ps aux` 找到可疑 PID → 再查 `/proc/<PID>/...`
-- 先 `grep` 日志定位攻击时间 → 再 `find -newermt` 搜索同时间段文件
-- 先 `readlink /proc/<PID>/exe` 找到文件路径 → 再 `stat` / `md5sum` 该文件
-
-**执行原则**：每轮拿到结果后，立即识别下一步中所有互相独立的命令，合并为一次并行调用。避免逐条串行执行独立命令。
-
-### 3.5 分析原则
-
-- **证据驱动**: 所有结论基于实际证据
-- **灵活调整**: 根据发现的线索动态选择命令
-- **场景化参数**: 命令中的时间范围、IP、关键字必须结合实际信息
-- **合理推测**: 证据不足时可以推测，但需明确标注
+> 并行/串行规则、证据原则统一遵循顶部「执行约定」。
 
 ---
 
 ## 步骤 4：漏洞定位和分析
 
-基于溯源结果，识别被利用的具体漏洞：
-- 漏洞类型（RCE、SQL 注入、文件上传、反序列化等）
-- 受影响的组件和版本
-- 攻击载荷（Payload）
-
-使用 `WebSearch` 查询 CVE 编号、公开 Exploit、修复方案。
+基于溯源结果识别被利用的漏洞（类型 / 受影响组件与版本 / Payload），用 `WebSearch` 查 CVE、Exploit、修复方案。
 
 ---
 
 ## 步骤 5：攻击链重建
 
-**Read `references/attack_framework.md`** 获取 ATT&CK 战术/技术编号。
+**Read `references/attack_framework.md`** 获取 ATT&CK 战术/技术编号，按 ATT&CK 战术阶段映射并构建时间线。
 
-按攻击阶段映射：初始访问 → 执行 → 持久化 → 权限提升 → 防御规避 → 凭证访问 → 发现 → 横向移动 → 收集 → 命令与控制 → 数据外传 → 影响
-
-**映射要求**: 使用具体子技术编号、提供证据支撑、未涉及的战术省略。
-
-同时按时间顺序构建攻击时间线。
+**映射要求**：使用具体子技术编号；每条映射必须有证据支撑；未涉及的战术省略。
 
 ---
 
 ## 步骤 6：遗留风险排查
 
-以下 6 个维度互相独立，应通过**并行 `mcp__siren__run` 调用同时执行**：
+并行执行 6 个独立维度：恶意文件（tmp 类目录） / cron（含全用户 crontab） / systemd unit + rc.local + init.d / 账户安全（passwd + `authorized_keys` + sudoers.d） / 网络连接 / 系统完整性（`rpm -Va`/`dpkg -V` + `ld.so.preload` + 多 profile 中的 `LD_PRELOAD`）。
 
-```bash
-# 组 1: 恶意文件 — Web Shell、临时目录可疑文件
-find /tmp /var/tmp /dev/shm -type f -ls 2>/dev/null
-
-# 组 2: 持久化 — cron + systemd + 启动脚本
-crontab -l 2>/dev/null; for u in $(cut -f1 -d: /etc/passwd); do echo "=== $u ==="; crontab -u $u -l 2>/dev/null; done; cat /etc/crontab 2>/dev/null; ls -la /etc/cron.d/ 2>/dev/null
-
-# 组 3: 持久化 — systemd 服务 + rc.local + init.d
-find /etc/systemd/system /usr/lib/systemd/system -type f -mtime -30 -ls 2>/dev/null; cat /etc/rc.local 2>/dev/null; ls -la /etc/init.d/ 2>/dev/null
-
-# 组 4: 账户安全 — 新增账户 + SSH 密钥 + sudo 配置
-awk -F: '$3 >= 1000 {print $1,$3,$7}' /etc/passwd; find /home /root -name "authorized_keys" -exec ls -la {} \; 2>/dev/null; ls -la /etc/sudoers.d/ 2>/dev/null
-
-# 组 5: 网络连接 — 活跃连接 + 监听端口
-netstat -antup 2>/dev/null; ss -tlnp 2>/dev/null
-
-# 组 6: 系统完整性 + 配置文件
-rpm -Va 2>/dev/null || dpkg -V 2>/dev/null; cat /etc/ld.so.preload 2>/dev/null; grep -l "LD_PRELOAD" /etc/profile /etc/profile.d/* /root/.bashrc /root/.bash_profile 2>/dev/null
-```
-
-根据结果进一步排查（如发现可疑项则深入调查）。
+任一组返回可疑项 → **Read `references/recon_residual.md`** 取下一步排查（含 rootkit 路由提示）。
 
 ---
 
@@ -264,41 +192,11 @@ rpm -Va 2>/dev/null || dpkg -V 2>/dev/null; cat /etc/ld.so.preload 2>/dev/null; 
 
 ### 7.1 输出文件命名规范
 
-```
-IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}].md
-```
-
-**字段说明**:
-- `IR-`：固定前缀（Incident Response），便于排序与过滤
-- `{YYYYMMDD}`：事件发生日期（优先使用告警时间，其次使用调查时间）
-- `{hostname}`：受影响主机名（不含域名后缀，特殊字符转 `-`）
-- `{event_type}`：事件类型 slug（见下表），未知时填 `unknown`
-- `{event_id}`：仅模式一包含，用于区分同主机多起事件
-
-**事件类型 slug 对照表**:
-
-| 中文事件类型 | slug |
-|------------|------|
-| Web Shell 后门 | `webshell` |
-| 挖矿木马 | `miner` |
-| 反弹 Shell | `revshell` |
-| 暴力破解 | `brute` |
-| 异常登录 | `abnlogin` |
-| 权限提升 | `privesc` |
-| 数据外传 | `exfil` |
-| 勒索软件 | `ransom` |
-| SQL 注入 | `sqli` |
-| 远程代码执行 (RCE) | `rce` |
-| 持久化后门 | `backdoor` |
-| 其他/未分类 | `unknown` |
-
-**示例**:
-- 模式一：`IR-20260417-web01-webshell-123456.md`
-- 模式二：`IR-20260417-db-prod-rce.md`
+文件名格式 `IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}].md`。完整字段说明、事件类型 slug 对照表与示例见 **`references/report_naming.md`**——生成报告前 Read 一次以确定正确的 slug 与命名。
 
 ### 7.2 生成步骤
 
-1. **确定输出文件**：调用 Skill 时的当前工作目录下，使用 §7.1 的命名规范确定 `IR-….md`
+1. **确定输出文件**：调用 Skill 时的当前工作目录下，按 `references/report_naming.md` 的命名规范确定 `IR-….md`
 2. **拷贝模板**：将 `<skill_root>/assets/report.md` 复制为该输出文件
 3. **填充报告副本**：只编辑该输出文件，把模板占位说明替换为本次事件的实际数据
 4. **只交付 Markdown**：不要创建报告目录、`index.html`、CSS/JS、字体资源或 dev server；本 skill 的交付物是一个 `IR-….md` 文件
@@ -316,14 +214,12 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}].md
 
 不要把模板改写成 HTML，不要添加 `<span style=...>`、`<font>`、内联 `color` 或其他视觉样式。
 
-### 7.4 报告要求
+### 7.4 报告要求（本项目特有约束）
 
-- **语言**: 简体中文
-- **证据**: 每个结论需要证据支撑；对云安全中心/SLS 类证据必须写明日志源、时间窗口、最早/最新记录与覆盖限制。主机侧报告至少覆盖网络外联、进程启动、远程/数据库登录、SAS 告警四类；即使进程侧没有命令执行证据，也要写明进程日志最早覆盖时间，避免把“未检出”误写成“未发生”
-- **IoC**: 完整提取所有网络/文件/进程/账户 IoC；报告可见文本里的 IPv4 地址统一做展示层转义，只把最后一个点替换成 `[.]`，例如 `1.1.1.1` 写成 `1.1.1[.]1`。执行命令、检索过滤和内部分析仍使用原始 IP，不要把转义形式拿去跑命令
-- **可操作性**: 提供具体的修复建议和操作步骤
-- **命令证据**：把在 SIREN 执行过的关键命令与关键输出片段粘进对应章节的证据代码块，不再单独输出 commands 日志
-- **样式**：保留 Markdown 模板的标题、frontmatter 和 `:::` 指令块，不要添加 HTML/CSS 内联样式、字体颜色或背景色；核心结论只填写内容，不改视觉样式
+- **云端证据写法**：SLS/SAS 类证据必须写明日志源、时间窗口、最早/最新记录与覆盖限制。主机侧报告至少覆盖网络外联、进程启动、远程/数据库登录、SAS 告警四类；进程侧无命令执行证据时也要写明进程日志最早覆盖时间，避免把「未检出」误写成「未发生」
+- **IoC IP 展示层转义**：报告可见文本里 IPv4 地址只把最后一个点替换成 `[.]`（如 `1.1.1.1` → `1.1.1[.]1`）。命令执行、检索过滤、内部分析仍用原始 IP
+- **命令证据**：在 SIREN 执行过的关键命令与关键输出片段直接粘进对应章节的证据代码块，不再单独输出 commands 日志
+- **样式**：保留模板的 frontmatter、标题和 `:::` 指令块；不添加 HTML/CSS 内联样式、字体颜色或背景色
 
 ---
 
@@ -338,32 +234,6 @@ IR-{YYYYMMDD}-{hostname}-{event_type}[-{event_id}].md
 | SAS 主机遥测（环境特有坑） | `references/sas_sls_host_telemetry.md` | 用 SAS SLS 补主机网络外联/进程启动/登录/告警覆盖时间线时加载：时间戳 CAST、`proc_start_time` 过滤、`w3wp.exe` 子进程解读、覆盖时间窗的报告写法 |
 | DNSLog / OOB 域名请求 | `references/oob_dnslog_investigation.md` | 调查 dnslog.cn、interact.sh、oast、burpcollaborator 等带外回连域名告警时加载 |
 | ATT&CK 框架 | `references/attack_framework.md` | 步骤5：攻击链映射时加载 |
+| 报告命名规范 | `references/report_naming.md` | 步骤7：确定 `IR-….md` 文件名与 event_type slug |
 | Markdown 报告模板 | `assets/report.md` | 步骤7：复制为 `IR-….md` 后原地编辑 |
-
----
-
-## 重要注意事项
-
-### 命令执行原则（严格遵守）
-
-- **只读**: 仅允许 cat, grep, find, ls, ps, netstat, lsof 等只读命令。严禁 `rm`、`mv`、`kill`、`dd`、`>` 覆盖重定向等破坏性操作
-- **限制输出**: 用 `tail -n N`、`head -n N`、`grep` 过滤，先 `wc -l` 评估大文件
-- **场景化参数**: 命令中的时间范围、IP、关键字必须结合实际告警信息填充
-
-### 并行执行
-
-- 互相独立的命令应通过多个并行的 `mcp__siren__run` 调用同时执行
-- 有依赖关系的命令（如先获取 PID 再查进程详情）必须顺序执行
-
-### 异常处理
-
-- **SIREN 命令超时或失败**: 记录失败，尝试简化命令后重试一次，仍失败则跳过并在报告中标注
-- **客户端断线**: 告知用户，等待重连或切换到备用客户端
-- **日志被清除**: 标注为"日志已被攻击者清除"，转向其他证据源（进程、网络、文件时间戳等）
-- **疑似误报**: 向用户说明判断依据，确认后结束调查
-
-### 分析原则
-
-- 所有结论基于实际证据；证据不足时可推测但需明确标注
-- 使用 `WebSearch` 查询 CVE 详情、IP 归属地、文件哈希（VirusTotal）、威胁情报
-- 输出语言：简体中文
+| 遗留风险可疑项下一步 | `references/recon_residual.md` | 步骤6：6 维并行检查发现可疑项后加载，含 rootkit 转 tech_attack_countermeasures.md 路由 |
