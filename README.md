@@ -1,6 +1,8 @@
-# security-incident-response
+# SLEUTH
 
 A Claude Code skill for security incident response. Runs read-only forensic commands on compromised hosts through the SIREN MCP server, reconstructs attack chains, and produces incident reports mapped to MITRE ATT&CK.
+
+Part of a family of named security tools: **SIREN** (remote forensic runtime), **TALON** (threat hunting), **SLEUTH** (this skill — incident investigator), **DOSSIER** (report platform).
 
 Reports and supporting materials are generated in Simplified Chinese by design (the skill targets Chinese-speaking SOC teams); this README is in English for discoverability.
 
@@ -24,7 +26,7 @@ Reports and supporting materials are generated in Simplified Chinese by design (
 Uses the community CLI [vercel-labs/skills](https://github.com/vercel-labs/skills):
 
 ```bash
-npx skills add SignorMercurio/security-incident-response-skill
+npx skills add SignorMercurio/sleuth
 ```
 
 ### Option 2 — `npx openskills`
@@ -32,21 +34,21 @@ npx skills add SignorMercurio/security-incident-response-skill
 Uses [openskills](https://github.com/numman-ali/openskills), installing at user scope:
 
 ```bash
-npx openskills install SignorMercurio/security-incident-response-skill --global
+npx openskills install SignorMercurio/sleuth --global
 ```
 
 ### Option 3 — `git clone`
 
 ```bash
-git clone https://github.com/SignorMercurio/security-incident-response-skill.git \
-  ~/.claude/skills/security-incident-response
+git clone https://github.com/SignorMercurio/sleuth.git \
+  ~/.claude/skills/sleuth
 ```
 
 ### Option 4 — `rsync` (for internal servers or air-gapped environments)
 
 ```bash
-rsync -avz --exclude '.git' ./security-incident-response-skill/ \
-  <host>:~/.claude/skills/security-incident-response/
+rsync -avz --exclude '.git' ./sleuth/ \
+  <host>:~/.claude/skills/sleuth/
 ```
 
 After install, run `/skills` inside Claude Code to confirm the skill is loaded. It activates automatically when the context matches and can also be invoked explicitly.
