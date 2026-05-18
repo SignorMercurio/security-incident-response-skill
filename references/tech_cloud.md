@@ -2,32 +2,69 @@
 
 ## 云助手命令日志
 
-**重要性**：云助手命令日志是溯源的关键证据，且**无法在控制台删除**。
+**重要性**：AK 泄露后通过 `RunCommand` / `InvokeCommand` 下发命令的攻击，云侧绕开 SSH/WebShell 入口，主机也无 `bash_history` 痕迹——只能靠这里。云助手命令日志是溯源的关键证据，且**无法在控制台删除**。
 
-**查看位置**：
+### 主机侧痕迹（SIREN 可直接捞 — Linux）
+
+**进程父链启发式（单点最决定性的信号）**：任何被 `aliyun-service` / `aliyun_assist_main` 直接或间接 parent 的命令链都是云侧下发。任意 RCE/挖矿/反弹 shell 调查里见到这条父链，立即按云助手 RunCommand 处理。
+
+```bash
+# agent 主进程：aliyun-service 是常驻 daemon，aliyun_assist_main 是执行任务时短暂派生的工作进程
+pgrep -fa 'aliyun-service|aliyun_assist'
+
+# 当前由 agent 派生的子孙进程（仅活进程；历史任务靠下面的日志 + ActionTrail 复盘）
+pid=$(pgrep -fo 'aliyun-service'); [ -n "$pid" ] && pstree -ap "$pid"
+```
+
+**命令执行日志**：`/var/log/aliyun/assist/<ver>/aliyun_assist_main.log` 含 task id、命令、执行时间、stdout/stderr 截断。按大小轮转，旧日志同目录 `.gz`。
+
+```bash
+# 先确认版本目录（升级后可能有多个历史版本残留）
+ls -lt /var/log/aliyun/assist/
+
+# 最近任务
+tail -n 200 /var/log/aliyun/assist/<ver>/aliyun_assist_main.log
+
+# 提取所有 task id、命令片段、时间戳
+grep -E 'taskId|invokeId|RunCommand|Execute|cmd' /var/log/aliyun/assist/<ver>/aliyun_assist_main.log
+
+# 历史归档
+zgrep -E 'taskId|RunCommand' /var/log/aliyun/assist/<ver>/aliyun_assist_main.log.*.gz
+```
+
+**临时脚本落地**：
+
+```bash
+# script 类型任务在 /tmp 建临时目录，留有原始脚本和 stdout 副本
+ls -lat /tmp/AliyunAssistScript-*/ 2>/dev/null
+
+# cloud-init 阶段下发的脚本
+ls -lat /var/lib/cloud/instance/scripts/ 2>/dev/null
+```
+
+**Agent 自身路径**：
+```
+/usr/local/share/aliyun-assist/<ver>/aliyun-service     # 常驻 daemon
+/usr/local/share/aliyun-assist/<ver>/aliyun_assist_main # 执行任务的工作进程
+systemctl status aliyun.service                          # systemd 单元
+```
+
+**判定"未预期"任务**：执行时间落在攻击窗口内 / 命令含外网下载（`curl|wget`）写 cron 改 `sshd_config` 等典型恶意行为 / ActionTrail 中对应 RunCommand 的 `sourceIpAddress` 不在已知运维网段。
+
+### 主机侧痕迹（SIREN 可直接捞 — Windows）
+
+进程：`AliyunService.exe`；日志：`C:\ProgramData\aliyun\assist\<ver>\log\`；脚本暂存：`C:\ProgramData\aliyun\assist\work\script\`。判定逻辑与 Linux 一致——父链命中 `AliyunService.exe` 的命令即云侧下发。
+
+### 云侧入口（交叉验证）
+
+控制台路径：
 ```
 ECS 控制台 -> 运维与监控 -> 云助手 -> 命令执行结果
 ```
 
-**特征识别**：
-```bash
-# 云助手相关目录和文件
-/usr/local/share/aliyun-assist/
-/usr/local/share/aliyun-assist/<version>/
-/var/lib/cloud/instance/scripts/
+拿到主机侧 task id / 时间戳后，回查 ActionTrail 的 `RunCommand` / `InvokeCommand` / `CreateCommand` 事件，对齐 `sourceIpAddress` 与 `userIdentity`（AK 或 RAM 用户），定位泄露的 AK。
 
-# 云助手进程
-ps aux | grep aliyun_assist
-```
-
-**告警类型**：
-- 云助手异常命令告警（云安全中心）
-- 检测到通过 CreateCommand API 创建的可疑命令
-
-**应对策略**：
-1. 遇到批量主机感染，优先检查云助手命令日志
-2. 查看是否有 AK 泄露导致的云助手滥用
-3. 检查 Actiontrail 中的 CreateCommand、InvokeCommand API 调用记录
+云安全中心侧有"云助手异常命令"和"CreateCommand 可疑命令"告警可作触发线索；批量主机感染时优先翻这块日志。
 
 ---
 
