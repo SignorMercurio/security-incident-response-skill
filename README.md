@@ -72,16 +72,22 @@ When there is no alarm ID, provide the Client ID plus a short description of the
 
 ```
 .
-├── SKILL.md                        # Skill definition and workflow
+├── SKILL.md                                # Skill definition and workflow
 ├── assets/
-│   └── report.md                   # Markdown report template copied from dossier/report.md
+│   └── report.md                           # Markdown report template copied from dossier/report.md
 └── references/
-    ├── invest_*.md                 # 12 attack-type playbooks (loaded on demand)
-    ├── tech_*.md                   # 6 tradecraft guides (loaded on demand)
-    └── attack_framework.md         # ATT&CK tactic/technique reference
+    ├── invest_*.md                         # 12 attack-type playbooks
+    ├── tech_*.md                           # 6 tradecraft guides
+    ├── attack_framework.md                 # ATT&CK tactic/technique reference
+    ├── report_naming.md                    # IR-….md filename format and event_type slug table
+    ├── cloud_log_queries.md                # WAF / SAS / ActionTrail log routing
+    ├── sas_sls_host_telemetry.md           # SAS SLS host telemetry queries (env-specific gotchas)
+    ├── oob_dnslog_investigation.md         # dnslog.cn / interact.sh / OOB callbacks
+    ├── recon_residual.md                   # Residual-risk follow-ups after the 6-axis sweep
+    └── aspnet_webshell_upload_tracing.md   # ASP.NET webshell upload tracing
 ```
 
-Files under `references/` are loaded on demand — the skill reads only the playbooks and tradecraft guides relevant to the current alarm or scenario, keeping the context window from being flooded on the first turn.
+Files under `references/` are loaded on demand — the skill reads only the entries relevant to the current alarm or scenario, keeping the context window from being flooded on the first turn.
 
 ## Output examples
 
@@ -92,7 +98,7 @@ The skill writes a Markdown report into the cwd:
 
 Each report file is copied from `assets/report.md` and then filled for the specific incident.
 
-The full event-type slug table (`webshell` / `miner` / `revshell` / `brute` / `abnlogin` / `privesc` / `exfil` / `ransom` / `sqli` / `rce` / `backdoor` / `unknown`) is documented in `SKILL.md` §7.1.
+The full event-type slug table (`webshell` / `miner` / `revshell` / `brute` / `abnlogin` / `privesc` / `exfil` / `ransom` / `sqli` / `rce` / `backdoor` / `unknown`) is documented in `references/report_naming.md`.
 
 ## Contributing
 
